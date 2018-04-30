@@ -134,7 +134,7 @@ spec:
       serviceAccountName: vault-crd-serviceaccount
       containers:
       - name: vault-crd
-        image: registry.gitlab.com/koudingspawn-public/kubernetes-vault
+        image: daspawnw/vault-crd:latest
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
