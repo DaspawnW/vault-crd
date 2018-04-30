@@ -1,0 +1,7 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-certjks
+spec:
+  path: "secret/test-url.example.com"
+  type: "CERTJKS"

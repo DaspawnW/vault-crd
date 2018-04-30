@@ -1,0 +1,7 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-dockercfg-error
+spec:
+  path: "blub/docker-hub"
+  type: "DOCKERCFG"

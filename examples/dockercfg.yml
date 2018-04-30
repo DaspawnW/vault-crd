@@ -1,0 +1,7 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-dockercfg
+spec:
+  path: "secret/docker-hub"
+  type: "DOCKERCFG"

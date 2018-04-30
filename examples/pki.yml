@@ -1,0 +1,10 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-pki
+spec:
+  path: "testpki/issue/testrole"
+  type: "PKI"
+  pkiConfiguration:
+    commonName: "localhost"
+    ttl: "7m"
