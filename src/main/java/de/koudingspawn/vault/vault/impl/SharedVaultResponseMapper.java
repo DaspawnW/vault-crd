@@ -79,7 +79,7 @@ public class SharedVaultResponseMapper {
     }
 
     private String getCrt(VaultResponseData responseData) {
-        return Base64.getEncoder().encodeToString(responseData.getCertificate().getBytes());
+        return Base64.getEncoder().encodeToString(responseData.getChainedCertificate().getBytes());
     }
 
     private String getKey(VaultResponseData responseData) {
