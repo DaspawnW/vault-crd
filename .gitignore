@@ -1,3 +1,4 @@
 target/*
 .idea/*
-vault/data/*
+*.iml
+vault/*
