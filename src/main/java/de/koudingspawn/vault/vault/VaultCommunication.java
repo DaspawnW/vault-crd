@@ -1,23 +1,30 @@
 package de.koudingspawn.vault.vault;
 
 import de.koudingspawn.vault.crd.VaultPkiConfiguration;
-import de.koudingspawn.vault.vault.impl.cert.CertResponse;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
+import de.koudingspawn.vault.vault.communication.TokenLookup;
+import de.koudingspawn.vault.vault.impl.cert.CertResponse;
 import de.koudingspawn.vault.vault.impl.dockercfg.DockerCfgResponse;
 import de.koudingspawn.vault.vault.impl.keyvalue.KeyValueResponse;
 import de.koudingspawn.vault.vault.impl.pki.PKIRequest;
 import de.koudingspawn.vault.vault.impl.pki.PKIResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 public class VaultCommunication {
+
+    private static final Logger log = LoggerFactory.getLogger(VaultCommunication.class);
 
     private static final String VAULT_HEADER_NAME = "X-Vault-Token";
 
@@ -44,6 +51,8 @@ public class VaultCommunication {
 
             throw new SecretNotAccessibleException(
                     String.format("Couldn't generate pki secret from vault path %s status code %d", path, statusCode));
+        } catch (RestClientException ex) {
+            throw new SecretNotAccessibleException("Couldn't communicate with vault", ex);
         }
     }
 
@@ -71,6 +80,8 @@ public class VaultCommunication {
 
             throw new SecretNotAccessibleException(
                     String.format("Couldn't load secret from vault path %s status code %d", path, statusCode));
+        } catch (RestClientException ex) {
+            throw new SecretNotAccessibleException("Couldn't communicate with vault", ex);
         }
     }
 
@@ -93,5 +104,20 @@ public class VaultCommunication {
         }
 
         return pkiRequest;
+    }
+
+    public boolean isHealthy() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(VAULT_HEADER_NAME, vaultToken);
+        HttpEntity entity = new HttpEntity(httpHeaders);
+
+        try {
+            HttpStatus statusCode = restTemplate.exchange(vaultUrl + "/auth/token/lookup-self", HttpMethod.GET, entity, TokenLookup.class).getStatusCode();
+
+            return statusCode.is2xxSuccessful();
+        } catch (RestClientException ex) {
+            log.error("Vault health check failed!", ex);
+            return false;
+        }
     }
 }
