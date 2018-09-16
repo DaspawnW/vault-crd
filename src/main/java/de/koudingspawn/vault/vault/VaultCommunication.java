@@ -2,50 +2,42 @@ package de.koudingspawn.vault.vault;
 
 import de.koudingspawn.vault.crd.VaultPkiConfiguration;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
-import de.koudingspawn.vault.vault.communication.TokenLookup;
-import de.koudingspawn.vault.vault.impl.cert.CertResponse;
-import de.koudingspawn.vault.vault.impl.dockercfg.DockerCfgResponse;
-import de.koudingspawn.vault.vault.impl.keyvalue.KeyValueResponse;
+import de.koudingspawn.vault.vault.impl.dockercfg.PullSecret;
 import de.koudingspawn.vault.vault.impl.pki.PKIRequest;
 import de.koudingspawn.vault.vault.impl.pki.PKIResponse;
+import jdk.nashorn.internal.parser.TokenLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
+
+import java.util.HashMap;
 
 @Component
 public class VaultCommunication {
 
     private static final Logger log = LoggerFactory.getLogger(VaultCommunication.class);
 
-    private static final String VAULT_HEADER_NAME = "X-Vault-Token";
+    private final VaultTemplate vaultTemplate;
 
-    private final RestTemplate restTemplate;
-    private final String vaultToken;
-    private final String vaultUrl;
-
-    public VaultCommunication(RestTemplate restTemplate, @Value("${kubernetes.vault.token}") String vaultToken, @Value("${kubernetes.vault.url}") String vaultUrl) {
-        this.restTemplate = restTemplate;
-        this.vaultToken = vaultToken;
-        this.vaultUrl = vaultUrl;
+    public VaultCommunication(VaultTemplate vaultTemplate) {
+        this.vaultTemplate = vaultTemplate;
     }
 
     public PKIResponse createPki(String path, VaultPkiConfiguration configuration) throws SecretNotAccessibleException {
         PKIRequest pkiRequest = generateRequest(configuration);
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(VAULT_HEADER_NAME, vaultToken);
-        HttpEntity<PKIRequest> requestEntity = new HttpEntity<>(pkiRequest, httpHeaders);
+        HttpEntity<PKIRequest> requestEntity = new HttpEntity<>(pkiRequest);
         try {
-            return restTemplate.postForObject(vaultUrl + path, requestEntity, PKIResponse.class);
+            return vaultTemplate.doWithSession(restOperations -> restOperations.postForObject(path, requestEntity, PKIResponse.class));
         } catch (HttpStatusCodeException exception) {
             int statusCode = exception.getStatusCode().value();
 
@@ -56,32 +48,29 @@ public class VaultCommunication {
         }
     }
 
-    public CertResponse getCert(String path) throws SecretNotAccessibleException {
-        return getRequest(path, CertResponse.class);
+    public PKIResponse getCert(String path) throws SecretNotAccessibleException {
+        return getRequest(path, PKIResponse.class);
     }
 
-    public DockerCfgResponse getDockerCfg(String path) throws SecretNotAccessibleException {
-        return getRequest(path, DockerCfgResponse.class);
+    public PullSecret getDockerCfg(String path) throws SecretNotAccessibleException {
+        return getRequest(path, PullSecret.class);
     }
 
-    public KeyValueResponse getKeyValue(String path) throws SecretNotAccessibleException {
-        return getRequest(path, KeyValueResponse.class);
+    public HashMap getKeyValue(String path) throws SecretNotAccessibleException {
+        return getRequest(path, HashMap.class);
     }
 
     private <T> T getRequest(String path, Class<T> clazz) throws SecretNotAccessibleException {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(VAULT_HEADER_NAME, vaultToken);
-        HttpEntity entity = new HttpEntity(httpHeaders);
-
         try {
-            return restTemplate.exchange(vaultUrl + path, HttpMethod.GET, entity, clazz).getBody();
-        } catch (HttpStatusCodeException exception) {
-            int statusCode = exception.getStatusCode().value();
-
+            VaultResponseSupport<T> response = vaultTemplate.read(path, clazz);
+            if (response != null) {
+                return response.getData();
+            } else {
+                throw new SecretNotAccessibleException(String.format("The secret %s is not available or in the wrong format.", path));
+            }
+        } catch (VaultException exception) {
             throw new SecretNotAccessibleException(
-                    String.format("Couldn't load secret from vault path %s status code %d", path, statusCode));
-        } catch (RestClientException ex) {
-            throw new SecretNotAccessibleException("Couldn't communicate with vault", ex);
+                    String.format("Couldn't load secret from vault path %s", path), exception);
         }
     }
 
@@ -107,14 +96,13 @@ public class VaultCommunication {
     }
 
     public boolean isHealthy() {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(VAULT_HEADER_NAME, vaultToken);
-        HttpEntity entity = new HttpEntity(httpHeaders);
+        return vaultTemplate.doWithSession(this::doWithRestOperations);
+    }
 
+    private boolean doWithRestOperations(RestOperations restOperations) {
         try {
-            HttpStatus statusCode = restTemplate.exchange(vaultUrl + "/auth/token/lookup-self", HttpMethod.GET, entity, TokenLookup.class).getStatusCode();
-
-            return statusCode.is2xxSuccessful();
+            ResponseEntity<TokenLookup> healthEntity = restOperations.getForEntity("/auth/token/lookup-self", TokenLookup.class);
+            return healthEntity.getStatusCode().is2xxSuccessful();
         } catch (RestClientException ex) {
             log.error("Vault health check failed!", ex);
             return false;

@@ -69,12 +69,13 @@ public class PKIChainTest {
     public void before() {
         WireMock.resetAllScenarios();
         client.secrets().inAnyNamespace().delete();
+
+        TestHelper.generateLookupSelfStub();
     }
 
     @Test
     public void shouldGeneratePkiFromVaultChainResource() throws Exception {
-        Date startDate = new Date();
-        VaultResponseData keyPair = generateKeyPair(startDate, 60L);
+        VaultResponseData keyPair = generateKeyPair();
         Vault vaultResource = generateVaultResource();
 
 
@@ -129,7 +130,7 @@ public class PKIChainTest {
         assertEquals(keyPair.getPrivate_key().replaceAll("\\\\n", "").replaceAll("\\n", ""), key.replaceAll("\\n", ""));
     }
 
-    private VaultResponseData generateKeyPair(Date startDate, long valid) {
+    private VaultResponseData generateKeyPair() {
         String certificate = "-----BEGIN CERTIFICATE-----\\n" +
                 "MIIDZjCCAk6gAwIBAgIUc8PIl50sEQM28x6CV7iK6fae4t4wDQYJKoZIhvcNAQEL\\n" +
                 "BQAwLTErMCkGA1UEAxMibXl2YXVsdC5jb20gSW50ZXJtZWRpYXRlIEF1dGhvcml0\\n" +

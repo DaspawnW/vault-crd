@@ -22,12 +22,12 @@ public class CertJksGenerator implements TypedSecretGenerator {
 
     @Override
     public VaultSecret generateSecret(Vault resource) throws SecretNotAccessibleException {
-        PKIResponse jksCert = vaultCommunication.getCert(resource.getSpec().getPath()).getData();
+        PKIResponse jksCert = vaultCommunication.getCert(resource.getSpec().getPath());
         return sharedVaultResponseMapper.mapJks(jksCert.getData(), resource.getSpec().getJksConfiguration(), resource.getSpec().getType());
     }
 
     @Override
-    public String getHash(VaultSpec spec) throws SecretNotAccessibleException {
+    public String getHash(VaultSpec spec) {
         return null;
     }
 }
