@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,8 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class KubernetesConnection {
+
+    private static final Logger log = LoggerFactory.getLogger(KubernetesConnection.class);
 
     @Bean
     @Profile("development")
@@ -37,7 +41,14 @@ public class KubernetesConnection {
             KubernetesClient client, @Value("${kubernetes.crd.name}") String crdName) {
         Resource<CustomResourceDefinition, DoneableCustomResourceDefinition> crdResource
                 = client.customResourceDefinitions().withName(crdName);
-        return client.customResources(crdResource.get(), Vault.class, VaultList.class, DoneableVault.class);
+
+        CustomResourceDefinition customResourceDefinition = crdResource.get();
+        if (customResourceDefinition == null) {
+            log.error("Please first apply custom resource definition and then restart vault-crd");
+            System.exit(1);
+        }
+
+        return client.customResources(customResourceDefinition, Vault.class, VaultList.class, DoneableVault.class);
     }
 
 }

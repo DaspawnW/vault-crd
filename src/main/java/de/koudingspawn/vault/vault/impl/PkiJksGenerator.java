@@ -27,7 +27,7 @@ public class PkiJksGenerator implements TypedSecretGenerator {
     }
 
     @Override
-    public String getHash(VaultSpec spec) throws SecretNotAccessibleException {
+    public String getHash(VaultSpec spec) {
         return null;
     }
 }

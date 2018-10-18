@@ -6,7 +6,6 @@ import de.koudingspawn.vault.vault.TypedSecretGenerator;
 import de.koudingspawn.vault.vault.VaultCommunication;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
-import de.koudingspawn.vault.vault.impl.keyvalue.KeyValueResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
@@ -26,15 +25,15 @@ public class KeyValueGenerator implements TypedSecretGenerator {
 
     @Override
     public VaultSecret generateSecret(Vault resource) throws SecretNotAccessibleException {
-        KeyValueResponse keyValueResponse = vaultCommunication.getKeyValue(resource.getSpec().getPath());
-        return mapKeyValueResponse(keyValueResponse.getData());
+        HashMap keyValueResponse = vaultCommunication.getKeyValue(resource.getSpec().getPath());
+        return mapKeyValueResponse(keyValueResponse);
     }
 
     @Override
     public String getHash(VaultSpec resource) throws SecretNotAccessibleException {
-        KeyValueResponse keyValue = vaultCommunication.getKeyValue(resource.getPath());
-        if (keyValue.getData() != null) {
-            return mapKeyValueResponse(keyValue.getData()).getCompare();
+        HashMap keyValue = vaultCommunication.getKeyValue(resource.getPath());
+        if (keyValue != null) {
+            return mapKeyValueResponse(keyValue).getCompare();
         }
 
         throw new SecretNotAccessibleException("Secret has no data field");

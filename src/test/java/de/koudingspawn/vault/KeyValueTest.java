@@ -11,7 +11,10 @@ import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,6 +58,8 @@ public class KeyValueTest {
     public void before() {
         WireMock.resetAllScenarios();
         client.secrets().inAnyNamespace().delete();
+
+        TestHelper.generateLookupSelfStub();
     }
 
     @Test

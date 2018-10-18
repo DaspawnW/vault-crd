@@ -6,8 +6,8 @@ import de.koudingspawn.vault.vault.TypedSecretGenerator;
 import de.koudingspawn.vault.vault.VaultCommunication;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
-import de.koudingspawn.vault.vault.impl.cert.CertResponse;
 import de.koudingspawn.vault.vault.impl.pki.PKIResponse;
+import de.koudingspawn.vault.vault.impl.pki.VaultResponseData;
 import org.springframework.stereotype.Component;
 
 @Component("CERTGENERATOR")
@@ -23,17 +23,17 @@ public class CertGenerator implements TypedSecretGenerator {
 
     @Override
     public VaultSecret generateSecret(Vault resource) throws SecretNotAccessibleException {
-        PKIResponse pkiResponse = vaultCommunication.getCert(resource.getSpec().getPath()).getData();
+        PKIResponse pkiResponse = vaultCommunication.getCert(resource.getSpec().getPath());
 
         return sharedVaultResponseMapper.mapCert(pkiResponse.getData());
     }
 
     @Override
     public String getHash(VaultSpec spec) throws SecretNotAccessibleException {
-        CertResponse cert = vaultCommunication.getCert(spec.getPath());
+        PKIResponse cert = vaultCommunication.getCert(spec.getPath());
         if (cert != null && cert.getData() != null) {
-            PKIResponse pkiResponse = cert.getData();
-            return sharedVaultResponseMapper.mapCert(pkiResponse.getData()).getCompare();
+            VaultResponseData pkiResponse = cert.getData();
+            return sharedVaultResponseMapper.mapCert(pkiResponse).getCompare();
         }
 
         throw new SecretNotAccessibleException("Secret has no data field");

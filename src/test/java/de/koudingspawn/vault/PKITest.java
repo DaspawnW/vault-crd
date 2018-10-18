@@ -71,6 +71,8 @@ public class PKITest {
     public void before() {
         WireMock.resetAllScenarios();
         client.secrets().inAnyNamespace().delete();
+
+        TestHelper.generateLookupSelfStub();
     }
 
     @Test
