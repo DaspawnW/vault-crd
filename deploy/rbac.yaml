@@ -134,7 +134,7 @@ spec:
       serviceAccountName: vault-crd-serviceaccount
       containers:
       - name: vault-crd
-        image: daspawnw/vault-crd:1.0.2
+        image: daspawnw/vault-crd:1.1.0
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
@@ -150,5 +150,3 @@ spec:
           successThreshold: 1
           timeoutSeconds: 5
       restartPolicy: Always
-      imagePullSecrets:
-      - name: gitlab-com
