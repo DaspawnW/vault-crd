@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,9 @@ public class KubernetesConnection {
             KubernetesClient client, @Value("${kubernetes.crd.name}") String crdName) {
         Resource<CustomResourceDefinition, DoneableCustomResourceDefinition> crdResource
                 = client.customResourceDefinitions().withName(crdName);
+
+        // Hack for bug in Kubernetes-Client for CRDs https://github.com/fabric8io/kubernetes-client/issues/1099
+        KubernetesDeserializer.registerCustomKind("koudingspawn.de/v1#Vault", Vault.class);
 
         CustomResourceDefinition customResourceDefinition = crdResource.get();
         if (customResourceDefinition == null) {

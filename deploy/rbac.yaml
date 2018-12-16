@@ -81,6 +81,7 @@ spec:
           properties:
             path:
               type: string
+              pattern: '^.*?\/.*?(\/.*?)?$'
             type:
               type: string
               enum:
@@ -90,6 +91,7 @@ spec:
                 - CERTJKS
                 - DOCKERCFG
                 - KEYVALUE
+                - KEYVALUEV2
             pkiConfiguration:
               type: object
               properties:
@@ -111,6 +113,11 @@ spec:
                   type: string
                 keyName:
                   type: string
+            versionConfiguration:
+              type: object
+              properties:
+                version:
+                  type: integer
           required:
           - path
           - type
@@ -134,7 +141,7 @@ spec:
       serviceAccountName: vault-crd-serviceaccount
       containers:
       - name: vault-crd
-        image: daspawnw/vault-crd:1.1.0
+        image: daspawnw/vault-crd:1.2.0
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
