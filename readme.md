@@ -5,6 +5,7 @@ Vault-CRD is a custom resource definition for holding secrets that are stored in
 The following Secret engines of Vault are supported:
 
 * KV (Version 1)
+* KV (Version 2)
 * PKI
 
 The following types of secrets can be managed by Vault-CRD:
