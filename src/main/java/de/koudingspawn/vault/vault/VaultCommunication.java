@@ -14,17 +14,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.VaultVersionedKeyValueOperations;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.vault.support.Versioned;
+import org.springframework.vault.support.Versioned.Version;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import java.util.HashMap;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Component
 public class VaultCommunication {
 
     private static final Logger log = LoggerFactory.getLogger(VaultCommunication.class);
+    private static final Pattern keyValuePattern = Pattern.compile("^.*?\\/.*?$");
 
     private final VaultTemplate vaultTemplate;
 
@@ -95,6 +101,32 @@ public class VaultCommunication {
         return pkiRequest;
     }
 
+    public HashMap getVersionedSecret(String path, Optional<Integer> version) throws SecretNotAccessibleException {
+        String mountPoint = extractMountPoint(path);
+        String extractedKey = extractKey(path);
+
+        VaultVersionedKeyValueOperations versionedKV = vaultTemplate.opsForVersionedKeyValue(mountPoint);
+        Versioned<HashMap> versionedResponse;
+
+        try {
+            if (version.isPresent()) {
+                versionedResponse = versionedKV.get(extractedKey, Version.from(version.get()), HashMap.class);
+            } else {
+                versionedResponse = versionedKV.get(extractedKey, HashMap.class);
+            }
+
+            if (versionedResponse != null) {
+                return versionedResponse.getData();
+            }
+
+            throw new SecretNotAccessibleException(String.format("The secret %s is not available or in the wrong format.", path));
+
+        } catch (VaultException ex) {
+            throw new SecretNotAccessibleException(
+                    String.format("Couldn't load secret from vault path %s", path), ex);
+        }
+    }
+
     public boolean isHealthy() {
         return vaultTemplate.doWithSession(this::doWithRestOperations);
     }
@@ -107,5 +139,21 @@ public class VaultCommunication {
             log.error("Vault health check failed!", ex);
             return false;
         }
+    }
+
+    private String extractMountPoint(String path) throws SecretNotAccessibleException {
+        if (keyValuePattern.matcher(path).matches()) {
+            return path.split("/")[0];
+        }
+
+        throw new SecretNotAccessibleException(String.format("Clould not extract mountpoint from path: %s. A valid path looks like 'mountpoint/key'", path));
+    }
+
+    private String extractKey(String path) throws SecretNotAccessibleException {
+        if (keyValuePattern.matcher(path).matches()) {
+            return path.split("/")[1];
+        }
+
+        throw new SecretNotAccessibleException(String.format("Clould not extract key from path: %s. A valid path looks like 'mountpoint/key'", path));
     }
 }

@@ -1,0 +1,9 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-keyvaluev2
+spec:
+  path: "keyvaluev2/example"
+  type: "KEYVALUEV2"
+  versionConfiguration:
+    version: 4

@@ -12,6 +12,7 @@ public class VaultSpec implements KubernetesResource {
     private VaultType type;
     private VaultPkiConfiguration pkiConfiguration;
     private VaultJKSConfiguration jksConfiguration;
+    private VaultVersionedConfiguration versionConfiguration;
 
     public String getPath() {
         return path;
@@ -43,5 +44,13 @@ public class VaultSpec implements KubernetesResource {
 
     public void setJksConfiguration(VaultJKSConfiguration jksConfiguration) {
         this.jksConfiguration = jksConfiguration;
+    }
+
+    public VaultVersionedConfiguration getVersionConfiguration() {
+        return versionConfiguration;
+    }
+
+    public void setVersionConfiguration(VaultVersionedConfiguration versionConfiguration) {
+        this.versionConfiguration = versionConfiguration;
     }
 }
