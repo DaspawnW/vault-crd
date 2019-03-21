@@ -143,17 +143,17 @@ public class VaultCommunication {
 
     private String extractMountPoint(String path) throws SecretNotAccessibleException {
         if (keyValuePattern.matcher(path).matches()) {
-            return path.split("/")[0];
+            return path.split("/", 2)[0];
         }
 
-        throw new SecretNotAccessibleException(String.format("Clould not extract mountpoint from path: %s. A valid path looks like 'mountpoint/key'", path));
+        throw new SecretNotAccessibleException(String.format("Could not extract mountpoint from path: %s. A valid path looks like 'mountpoint/key'", path));
     }
 
     private String extractKey(String path) throws SecretNotAccessibleException {
         if (keyValuePattern.matcher(path).matches()) {
-            return path.split("/")[1];
+            return path.split("/", 2)[1];
         }
 
-        throw new SecretNotAccessibleException(String.format("Clould not extract key from path: %s. A valid path looks like 'mountpoint/key'", path));
+        throw new SecretNotAccessibleException(String.format("Could not extract key from path: %s. A valid path looks like 'mountpoint/key'", path));
     }
 }

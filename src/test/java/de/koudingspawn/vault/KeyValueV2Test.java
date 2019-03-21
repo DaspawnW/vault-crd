@@ -218,4 +218,51 @@ public class KeyValueV2Test {
         assertFalse(keyValueV2Refresh.refreshIsNeeded(vault));
     }
 
+    @Test
+    public void shouldSupportNestedPath() {
+        Vault vault = new Vault();
+        vault.setMetadata(
+                new ObjectMetaBuilder().withName("simple").withNamespace("default").build());
+        VaultSpec vaultSpec = new VaultSpec();
+        vaultSpec.setType(VaultType.KEYVALUEV2);
+        vaultSpec.setPath("secret/simple/nested");
+        vault.setSpec(vaultSpec);
+
+        stubFor(get(urlPathMatching("/v1/secret/data/simple/nested"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\n" +
+                                "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
+                                "  \"lease_id\": \"\",\n" +
+                                "  \"renewable\": false,\n" +
+                                "  \"lease_duration\": 0,\n" +
+                                "  \"data\": {\n" +
+                                "    \"data\": {\n" +
+                                "      \"key\": \"value\",\n" +
+                                "      \"nested\": \"value2\"\n" +
+                                "    },\n" +
+                                "    \"metadata\": {\n" +
+                                "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
+                                "      \"deletion_time\": \"\",\n" +
+                                "      \"destroyed\": false,\n" +
+                                "      \"version\": 1\n" +
+                                "    }\n" +
+                                "  },\n" +
+                                "  \"wrap_info\": null,\n" +
+                                "  \"warnings\": null,\n" +
+                                "  \"auth\": null\n" +
+                                "}")));
+
+        handler.addHandler(vault);
+
+        Secret secret = testClient.secrets().inNamespace("default").withName("simple").get();
+        assertEquals("simple", secret.getMetadata().getName());
+        assertEquals("default", secret.getMetadata().getNamespace());
+        assertEquals("Opaque", secret.getType());
+        assertEquals("dmFsdWU=", secret.getData().get("key"));
+        assertEquals("dmFsdWUy", secret.getData().get("nested"));
+        assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
+        assertEquals("z/SCo8oELBDAF2DQvX2H3yLs6vvn55Z6c8fdS3Y7l64=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
+    }
 }
