@@ -59,9 +59,10 @@ public class KubernetesService {
     void modifySecret(Vault resource, VaultSecret vaultSecret) {
         Resource<Secret, DoneableSecret> secretDoneableSecretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
         Secret secret;
-        try {
+
+        if (secretDoneableSecretResource.get() != null) {
             secret = secretDoneableSecretResource.get();
-        } catch (NullPointerException e) {
+        } else {
             secret = newSecretInstance(resource, vaultSecret);
         }
 

@@ -142,4 +142,31 @@ public class KeyValueTest {
         assertFalse(keyValueRefresh.refreshIsNeeded(vault));
     }
 
+    @Test
+    public void preventNullPointerExceptionWhenSecretDoesNotExist() {
+        Vault vault = new Vault();
+        vault.setMetadata(
+                new ObjectMetaBuilder().withName("simple").withNamespace("default").build());
+        VaultSpec vaultSpec = new VaultSpec();
+        vaultSpec.setType(VaultType.KEYVALUE);
+        vaultSpec.setPath("secret/simple");
+        vault.setSpec(vaultSpec);
+
+        stubFor(get(urlPathMatching("/v1/secret/simple"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"request_id\":\"6cc090a8-3821-8244-73e4-5ab62b605587\",\"lease_id\":\"\",\"renewable\":false,\"lease_duration\":2764800,\"data\":{\"key\":\"value\"},\"wrap_info\":null,\"warnings\":null,\"auth\":null}")));
+
+        handler.modifyHandler(vault);
+
+        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
+        assertEquals("simple", secret.getMetadata().getName());
+        assertEquals("default", secret.getMetadata().getNamespace());
+        assertEquals("Opaque", secret.getType());
+        assertEquals("dmFsdWU=", secret.getData().get("key"));
+        assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
+        assertEquals("dYxf3NXqZ1l2d1YL1htbVBs6EUot33VjoBUUrBJg1eY=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
+    }
+
 }
