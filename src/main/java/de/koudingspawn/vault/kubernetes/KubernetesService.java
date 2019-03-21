@@ -36,13 +36,17 @@ public class KubernetesService {
         return getSecretByVault(resource) != null;
     }
 
-    void createSecret(Vault resource, VaultSecret vaultSecret) {
+    private Secret newSecretInstance(Vault resource, VaultSecret vaultSecret){
         Secret secret = new Secret();
         secret.setType(vaultSecret.getType());
         secret.setMetadata(metaData(resource.getMetadata(), vaultSecret.getCompare()));
         secret.setData(vaultSecret.getData());
 
-        client.secrets().inNamespace(resource.getMetadata().getNamespace()).create(secret);
+        return secret;
+    }
+
+    void createSecret(Vault resource, VaultSecret vaultSecret) {
+        client.secrets().inNamespace(resource.getMetadata().getNamespace()).create(newSecretInstance(resource, vaultSecret));
 
         log.info("Created secret for vault resource {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
     }
@@ -54,7 +58,14 @@ public class KubernetesService {
 
     void modifySecret(Vault resource, VaultSecret vaultSecret) {
         Resource<Secret, DoneableSecret> secretDoneableSecretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
-        Secret secret = secretDoneableSecretResource.get();
+        Secret secret;
+
+        if (secretDoneableSecretResource.get() != null) {
+            secret = secretDoneableSecretResource.get();
+        } else {
+            secret = newSecretInstance(resource, vaultSecret);
+        }
+
         secret.setType(vaultSecret.getType());
         updateAnnotations(secret, vaultSecret.getCompare());
         secret.setData(vaultSecret.getData());
