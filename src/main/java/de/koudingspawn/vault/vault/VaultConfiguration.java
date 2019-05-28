@@ -55,11 +55,14 @@ public class VaultConfiguration {
 
         private final String vaultUrl;
         private final String role;
+        private final String path;
 
         VaultServiceAccountConnection(@Value("${kubernetes.vault.url}") String vaultUrl,
-                                      @Value("${kubernetes.vault.role}") String role) {
+                                      @Value("${kubernetes.vault.role}") String role,
+                                      @Value("${kubernetes.vault.path:kubernetes}") String path) {
             this.vaultUrl = vaultUrl;
             this.role = role;
+            this.path = path;
         }
 
         @Override
@@ -70,7 +73,7 @@ public class VaultConfiguration {
         @Override
         public ClientAuthentication clientAuthentication() {
             KubernetesAuthenticationOptions options =
-                    KubernetesAuthenticationOptions.builder().role(role).build();
+                    KubernetesAuthenticationOptions.builder().path(path).role(role).build();
 
             return new KubernetesAuthentication(options, restOperations());
         }
