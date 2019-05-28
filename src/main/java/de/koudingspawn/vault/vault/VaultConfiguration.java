@@ -59,15 +59,10 @@ public class VaultConfiguration {
 
         VaultServiceAccountConnection(@Value("${kubernetes.vault.url}") String vaultUrl,
                                       @Value("${kubernetes.vault.role}") String role,
-                                      @Value("${kubernetes.vault.path}") String path) {
+                                      @Value("${kubernetes.vault.path:kubernetes}") String path) {
             this.vaultUrl = vaultUrl;
             this.role = role;
-
-            if (!path.equals("")) {
-                this.path = path;
-            } else {
-                this.path = KubernetesAuthenticationOptions.DEFAULT_KUBERNETES_AUTHENTICATION_PATH;
-            }
+            this.path = path;
         }
 
         @Override
