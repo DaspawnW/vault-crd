@@ -141,7 +141,7 @@ spec:
       serviceAccountName: vault-crd-serviceaccount
       containers:
       - name: vault-crd
-        image: daspawnw/vault-crd:1.2.1
+        image: daspawnw/vault-crd:1.2.2
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
