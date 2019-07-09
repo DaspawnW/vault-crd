@@ -96,7 +96,7 @@ public class DockerCfgTest {
         assertEquals("default", secret.getMetadata().getNamespace());
         assertEquals("kubernetes.io/dockercfg", secret.getType());
         assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
-        assertEquals("JQB1myAat/Yioz8X8wYiKg7yOasGx2C2M6KrOCUWCsU=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
+        assertEquals("+gE+L0DNsGWDlNz5T3jLp1/U08KbD4OF+ez2lXQlTPM=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
 
         String dockerCfgBase64 = secret.getData().get(".dockercfg");
         String dockerCfg = new String(Base64.getDecoder().decode(dockerCfgBase64));
@@ -108,6 +108,7 @@ public class DockerCfgTest {
         assertEquals("username", credentials.get("username").asText());
         assertEquals("password", credentials.get("password").asText());
         assertEquals("test-user@test.com", credentials.get("email").asText());
+        assertEquals("username:password", new String(Base64.getDecoder().decode(credentials.get("auth").asText())));
     }
 
     @Test
