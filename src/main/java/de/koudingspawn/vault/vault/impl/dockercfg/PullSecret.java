@@ -1,5 +1,7 @@
 package de.koudingspawn.vault.vault.impl.dockercfg;
 
+import java.util.Base64;
+
 public class PullSecret {
 
     private String username;
@@ -37,5 +39,10 @@ public class PullSecret {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getAuth() {
+        String concatedAuth = getUsername() + ":" + getPassword();
+        return Base64.getEncoder().encodeToString(concatedAuth.getBytes());
     }
 }

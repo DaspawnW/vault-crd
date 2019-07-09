@@ -39,8 +39,8 @@ public class DockerCfgGenerator implements TypedSecretGenerator {
     }
 
     private VaultSecret mapDockerCfg(PullSecret pullSecret) {
-        String dockerCfg = String.format("{\"%s\": {\"username\": \"%s\", \"password\": \"%s\", \"email\": \"%s\"}}",
-                pullSecret.getUrl(), pullSecret.getUsername(), pullSecret.getPassword(), pullSecret.getEmail());
+        String dockerCfg = String.format("{\"%s\": {\"username\": \"%s\", \"password\": \"%s\", \"email\": \"%s\", \"auth\": \"%s\"}}",
+                pullSecret.getUrl(), pullSecret.getUsername(), pullSecret.getPassword(), pullSecret.getEmail(), pullSecret.getAuth());
 
         Map<String, String> data = new HashMap<>();
         data.put(".dockercfg", Base64.getEncoder().encodeToString(dockerCfg.getBytes()));
