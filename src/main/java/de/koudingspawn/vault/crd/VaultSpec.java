@@ -13,6 +13,7 @@ public class VaultSpec implements KubernetesResource {
     private VaultPkiConfiguration pkiConfiguration;
     private VaultJKSConfiguration jksConfiguration;
     private VaultVersionedConfiguration versionConfiguration;
+    private VaultPropertiesConfiguration propertiesConfiguration;
 
     public String getPath() {
         return path;
@@ -52,5 +53,13 @@ public class VaultSpec implements KubernetesResource {
 
     public void setVersionConfiguration(VaultVersionedConfiguration versionConfiguration) {
         this.versionConfiguration = versionConfiguration;
+    }
+
+    public VaultPropertiesConfiguration getPropertiesConfiguration() {
+        return propertiesConfiguration;
+    }
+
+    public void setPropertiesConfiguration(VaultPropertiesConfiguration propertiesConfiguration) {
+        this.propertiesConfiguration = propertiesConfiguration;
     }
 }

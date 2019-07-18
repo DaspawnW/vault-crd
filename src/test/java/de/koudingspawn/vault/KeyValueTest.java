@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(
         properties = {
-                "kubernetes.vault.url=http://localhost:8200/v1/"
+                "kubernetes.vault.url=http://localhost:8209/v1/"
         },
         classes = {
                 TestConfiguration.class
@@ -40,7 +40,7 @@ public class KeyValueTest {
 
     @ClassRule
     public static WireMockClassRule wireMockClassRule =
-            new WireMockClassRule(wireMockConfig().port(8200));
+            new WireMockClassRule(wireMockConfig().port(8209));
 
     @Rule
     public WireMockClassRule instanceRule = wireMockClassRule;
