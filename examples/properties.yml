@@ -1,0 +1,15 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: properties-example
+spec:
+  type: "PROPERTIES"
+  propertiesConfiguration:
+    context:
+      contextKey: value
+    files:
+      test.properties: |
+        test={{ contextKey }}
+        datasource.username={{ vault.lookupV2('database/root').get('username') }}
+        datasource.password={{ vault.lookupV2('database/root').get('password') }}
+        datasource.host={{ vault.lookup('datasource/host', 'host') }}
