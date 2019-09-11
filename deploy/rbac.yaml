@@ -114,6 +114,8 @@ spec:
                   type: string
                 keyName:
                   type: string
+                caAlias:
+                  type: string
             versionConfiguration:
               type: object
               properties:
