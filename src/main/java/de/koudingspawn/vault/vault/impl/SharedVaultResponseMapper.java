@@ -100,6 +100,13 @@ public class SharedVaultResponseMapper {
                     getPassword(jksConfiguration).toCharArray(),
                     publicKeyList);
 
+            if (!StringUtils.isEmpty(jksConfiguration.getCaAlias())) {
+                keyStore.setCertificateEntry(
+                    jksConfiguration.getCaAlias(),
+                    getPublicKey(data.getIssuing_ca())[0]
+                );
+            }
+
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             keyStore.store(outputStream, getPassword(jksConfiguration).toCharArray());
 

@@ -5,6 +5,7 @@ public class VaultJKSConfiguration {
     private String password;
     private String alias;
     private String keyName;
+    private String caAlias;
 
     public String getPassword() {
         return password;
@@ -28,5 +29,13 @@ public class VaultJKSConfiguration {
 
     public void setKeyName(String keyName) {
         this.keyName = keyName;
+    }
+
+    public String getCaAlias() {
+        return caAlias;
+    }
+
+    public void setCaAlias(String caAlias) {
+        this.caAlias = caAlias;
     }
 }
