@@ -1,20 +1,24 @@
 package de.koudingspawn.vault.kubernetes;
 
+import de.koudingspawn.vault.TestHelper;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.api.model.SecretList;
-import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
-import java.util.List;
 
 import static de.koudingspawn.vault.Constants.COMPARE_ANNOTATION;
 import static org.junit.Assert.*;
@@ -26,14 +30,28 @@ public class KubernetesServiceTest {
     private static String COMPARE = "COMPARE";
     private static String CRDNAME = "CRDNAME";
 
-    @Rule
-    public KubernetesServer server = new KubernetesServer(true, true);
+    @Autowired
+    public KubernetesClient client;
 
     private KubernetesService kubernetesService;
 
+    @org.springframework.boot.test.context.TestConfiguration
+    static class KindConfig {
+
+        @Bean
+        @Primary
+        public KubernetesClient client() {
+            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+            TestHelper.createCrd(kubernetesClient);
+
+            return kubernetesClient;
+        }
+
+    }
+
     @Before
     public void setUp() {
-        kubernetesService = new KubernetesService(server.getClient(), CRDNAME);
+        kubernetesService = new KubernetesService(client, CRDNAME);
     }
 
     @Test
@@ -41,7 +59,7 @@ public class KubernetesServiceTest {
         Vault vault = generateVault();
 
         Secret testsecret = generateSecret();
-        server.getClient().secrets().inNamespace("default").create(testsecret);
+        client.secrets().inNamespace("default").create(testsecret);
 
         boolean exists = kubernetesService.exists(vault);
 
@@ -64,12 +82,8 @@ public class KubernetesServiceTest {
 
         kubernetesService.createSecret(vault, vaultSecret);
 
-        SecretList secrets = server.getClient().secrets().inAnyNamespace().list();
-        assertEquals(1, secrets.getItems().size());
-        Secret secret = secrets.getItems().get(0);
-        assertEquals("default", secret.getMetadata().getNamespace());
-        assertEquals("testsecret", secret.getMetadata().getName());
-        assertEquals("value", secret.getData().get("key"));
+        Secret secret = client.secrets().inNamespace("default").withName("testsecret").get();
+        assertEquals("dmFsdWU=", secret.getData().get("key")); // value
         assertEquals("Opaque", secret.getType());
         assertEquals(COMPARE, secret.getMetadata().getAnnotations().get(CRDNAME + COMPARE_ANNOTATION));
         assertNotNull(secret.getMetadata().getAnnotations().get(CRDNAME + COMPARE_ANNOTATION));
@@ -79,39 +93,38 @@ public class KubernetesServiceTest {
     public void shouldDeleteSecret() {
         Secret secret = generateSecret();
 
-        server.getClient().secrets().inNamespace("default").create(secret);
-        List<Secret> preList = server.getClient().secrets().inNamespace("default").list().getItems();
-        assertEquals(1, preList.size());
+        client.secrets().inNamespace("default").create(secret);
+
+        assertNotNull(client.secrets().inNamespace("default").withName("testsecret").get());
 
         kubernetesService.deleteSecret(generateVault().getMetadata());
 
-        List<Secret> secrets = server.getClient().secrets().inNamespace("default").list().getItems();
-        assertEquals(0, secrets.size());
+        assertNull(client.secrets().inNamespace("default").withName("testsecret").get());
     }
 
     @Test
     public void shouldModifySecret() {
         Secret secret = generateSecret();
-        server.getClient().secrets().inNamespace("default").create(secret);
+        client.secrets().inNamespace("default").create(secret);
 
         Vault vault = generateVault();
         HashMap<String, String> data = new HashMap<>();
-        data.put("key1", "value1");
-        VaultSecret modifiedVaultSecret = new VaultSecret(data, COMPARE + "NEW", "SPECIALTYPE");
+        data.put("key1", "dmFsdWUx"); // value1
+        VaultSecret modifiedVaultSecret = new VaultSecret(data, COMPARE + "NEW");
 
         kubernetesService.modifySecret(vault, modifiedVaultSecret);
 
-        Secret foundSecret = server.getClient().secrets().inNamespace("default").withName("testsecret").get();
+        Secret foundSecret = client.secrets().inNamespace("default").withName("testsecret").get();
 
         assertEquals(COMPARE + "NEW", foundSecret.getMetadata().getAnnotations().get(CRDNAME + COMPARE_ANNOTATION));
-        assertEquals("SPECIALTYPE", foundSecret.getType());
-        assertEquals("value1", foundSecret.getData().get("key1"));
+        assertEquals("Opaque", foundSecret.getType());
+        assertEquals("dmFsdWUx", foundSecret.getData().get("key1"));
         assertNull(foundSecret.getData().get("key"));
     }
 
     private Secret generateSecret() {
         HashMap<String, String> data = new HashMap<>();
-        data.put("key", "value");
+        data.put("key", "dmFsdWU="); // value
 
         return new SecretBuilder()
                 .withNewMetadata()
@@ -123,7 +136,7 @@ public class KubernetesServiceTest {
 
     private VaultSecret generateVaultSecret() {
         HashMap<String, String> data = new HashMap<>();
-        data.put("key", "value");
+        data.put("key", "dmFsdWU=");
         return new VaultSecret(data, COMPARE);
     }
 
@@ -135,6 +148,17 @@ public class KubernetesServiceTest {
         vault.setMetadata(meta);
 
         return vault;
+    }
+
+    @After
+    public void delete() {
+        client.secrets().inNamespace("default").delete(client.secrets().inNamespace("default").list().getItems());
+    }
+
+    @AfterClass
+    public static void cleanupK8S() {
+        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }

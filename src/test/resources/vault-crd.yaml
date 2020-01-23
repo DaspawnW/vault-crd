@@ -1,0 +1,70 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: vault.koudingspawn.de
+spec:
+  group: koudingspawn.de
+  version: v1
+  scope: Namespaced
+  names:
+    plural: vault
+    singular: vault
+    kind: Vault
+    shortNames:
+      - vt
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            path:
+              type: string
+              pattern: '^.*?\/.*?(\/.*?)?$'
+            type:
+              type: string
+              enum:
+                - PKI
+                - PKIJKS
+                - CERT
+                - CERTJKS
+                - DOCKERCFG
+                - KEYVALUE
+                - KEYVALUEV2
+                - PROPERTIES
+            pkiConfiguration:
+              type: object
+              properties:
+                commonName:
+                  type: string
+                altNames:
+                  type: string
+                ipSans:
+                  type: string
+                ttl:
+                  type: string
+                  pattern: '^[0-9]{1,}[hm]$'
+            jksConfiguration:
+              type: object
+              properties:
+                password:
+                  type: string
+                alias:
+                  type: string
+                keyName:
+                  type: string
+                caAlias:
+                  type: string
+            versionConfiguration:
+              type: object
+              properties:
+                version:
+                  type: integer
+            propertiesConfiguration:
+              type: object
+              properties:
+                context:
+                  type: object
+                files:
+                  type: object
+          required:
+            - type

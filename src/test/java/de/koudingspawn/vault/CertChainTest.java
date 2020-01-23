@@ -10,14 +10,14 @@ import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -33,11 +33,7 @@ import static org.junit.Assert.*;
                 "kubernetes.vault.url=http://localhost:8206/v1/",
                 "kubernetes.initial-delay=5000000",
                 "kubernetes.vault.token=c73ab0cb-41e6-b89c-7af6-96b36f1ac87b"
-        },
-        classes = {
-                TestConfiguration.class
         }
-
 )
 public class CertChainTest {
 
@@ -52,7 +48,21 @@ public class CertChainTest {
     public EventHandler handler;
 
     @Autowired
-    KubernetesClient client;
+    public KubernetesClient client;
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class KindConfig {
+
+        @Bean
+        @Primary
+        public KubernetesClient client() {
+            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+            TestHelper.createCrd(kubernetesClient);
+
+            return kubernetesClient;
+        }
+
+    }
 
     @Autowired
     CertRefresh certRefresh;
@@ -220,6 +230,10 @@ public class CertChainTest {
         assertTrue(certRefresh.refreshIsNeeded(vault));
     }
 
-
+    @AfterClass
+    public static void cleanupK8S() {
+        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+        TestHelper.deleteCRD(kubernetesClient);
+    }
 
 }

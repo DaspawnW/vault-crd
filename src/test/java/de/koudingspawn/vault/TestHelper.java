@@ -1,8 +1,9 @@
 package de.koudingspawn.vault;
 
+import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -83,4 +84,14 @@ public class TestHelper {
                                 "}")));
     }
 
+
+    public static void createCrd(KubernetesClient kubernetesClient) {
+        CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
+        kubernetesClient.customResourceDefinitions().createOrReplace(pgDBMS);
+    }
+
+    public static void deleteCRD(KubernetesClient kubernetesClient) {
+        CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
+        kubernetesClient.customResourceDefinitions().delete(pgDBMS);
+    }
 }

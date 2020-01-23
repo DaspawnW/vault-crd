@@ -10,14 +10,14 @@ import de.koudingspawn.vault.kubernetes.scheduler.impl.KeyValueV2Refresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -31,9 +31,6 @@ import static org.junit.Assert.*;
 @SpringBootTest(
         properties = {
                 "kubernetes.vault.url=http://localhost:8207/v1/"
-        },
-        classes = {
-                TestConfiguration.class
         }
 )
 public class KeyValueV2Test {
@@ -52,7 +49,21 @@ public class KeyValueV2Test {
     public KeyValueV2Refresh keyValueV2Refresh;
 
     @Autowired
-    KubernetesClient testClient;
+    public KubernetesClient testClient;
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class KindConfig {
+
+        @Bean
+        @Primary
+        public KubernetesClient client() {
+            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+            TestHelper.createCrd(kubernetesClient);
+
+            return kubernetesClient;
+        }
+
+    }
 
     @Before
     public void before() {
@@ -264,5 +275,11 @@ public class KeyValueV2Test {
         assertEquals("dmFsdWUy", secret.getData().get("nested"));
         assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
         assertEquals("z/SCo8oELBDAF2DQvX2H3yLs6vvn55Z6c8fdS3Y7l64=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
+    }
+
+    @AfterClass
+    public static void cleanupK8S() {
+        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+        TestHelper.deleteCRD(kubernetesClient);
     }
 }

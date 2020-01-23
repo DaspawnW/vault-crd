@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static de.koudingspawn.vault.Constants.COMPARE_ANNOTATION;
 import static de.koudingspawn.vault.Constants.LAST_UPDATE_ANNOTATION;
@@ -95,6 +97,10 @@ public class KubernetesService {
 
 
     private void updateAnnotations(Secret secret, String compare) {
+        if (secret.getMetadata().getAnnotations() == null) {
+            secret.getMetadata().setAnnotations(new HashMap<>());
+        }
+
         Map<String, String> annotations = secret.getMetadata().getAnnotations();
         annotations.put(crdName + LAST_UPDATE_ANNOTATION, LocalDateTime.now().toString());
         annotations.put(crdName + COMPARE_ANNOTATION, compare);
