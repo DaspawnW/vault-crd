@@ -1,6 +1,7 @@
 package de.koudingspawn.vault.vault.impl;
 
 import de.koudingspawn.vault.crd.Vault;
+import de.koudingspawn.vault.crd.VaultDockerCfgConfiguration;
 import de.koudingspawn.vault.crd.VaultSpec;
 import de.koudingspawn.vault.vault.TypedSecretGenerator;
 import de.koudingspawn.vault.vault.VaultCommunication;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component("DOCKERCFGGENERATOR")
 public class DockerCfgGenerator implements TypedSecretGenerator {
@@ -24,18 +26,22 @@ public class DockerCfgGenerator implements TypedSecretGenerator {
 
     @Override
     public VaultSecret generateSecret(Vault resource) throws SecretNotAccessibleException {
-        PullSecret dockerCfg = vaultCommunication.getDockerCfg(resource.getSpec().getPath());
+        PullSecret dockerCfg = vaultCommunication.getDockerCfg(resource.getSpec().getPath(), getConfiguration(resource.getSpec()));
         return mapDockerCfg(dockerCfg);
     }
 
     @Override
     public String getHash(VaultSpec spec) throws SecretNotAccessibleException {
-        PullSecret dockerCfg = vaultCommunication.getDockerCfg(spec.getPath());
+        PullSecret dockerCfg = vaultCommunication.getDockerCfg(spec.getPath(), getConfiguration(spec));
         if (dockerCfg != null) {
             return mapDockerCfg(dockerCfg).getCompare();
         }
 
         throw new SecretNotAccessibleException("Secret has no data field");
+    }
+
+    private VaultDockerCfgConfiguration getConfiguration(VaultSpec spec) {
+        return Optional.ofNullable(spec.getDockerCfgConfiguration()).orElse(new VaultDockerCfgConfiguration());
     }
 
     private VaultSecret mapDockerCfg(PullSecret pullSecret) {
