@@ -1,6 +1,8 @@
 package de.koudingspawn.vault.vault;
 
+import de.koudingspawn.vault.crd.VaultDockerCfgConfiguration;
 import de.koudingspawn.vault.crd.VaultPkiConfiguration;
+import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import de.koudingspawn.vault.vault.impl.dockercfg.PullSecret;
 import de.koudingspawn.vault.vault.impl.pki.PKIRequest;
@@ -58,8 +60,12 @@ public class VaultCommunication {
         return getRequest(path, PKIResponse.class);
     }
 
-    public PullSecret getDockerCfg(String path) throws SecretNotAccessibleException {
-        return getRequest(path, PullSecret.class);
+    public PullSecret getDockerCfg(String path, VaultDockerCfgConfiguration dockerCfgConfiguration) throws SecretNotAccessibleException {
+        if (dockerCfgConfiguration.getType().equals(VaultType.KEYVALUE)) {
+            return getRequest(path, PullSecret.class);
+        } else {
+            return getVersionedSecret(path, Optional.ofNullable(dockerCfgConfiguration.getVersion()), PullSecret.class);
+        }
     }
 
     public HashMap getKeyValue(String path) throws SecretNotAccessibleException {
@@ -102,17 +108,21 @@ public class VaultCommunication {
     }
 
     public HashMap getVersionedSecret(String path, Optional<Integer> version) throws SecretNotAccessibleException {
+        return getVersionedSecret(path, version, HashMap.class);
+    }
+
+    private <T> T getVersionedSecret(String path, Optional<Integer> version, Class<T> clazz) throws SecretNotAccessibleException{
         String mountPoint = extractMountPoint(path);
         String extractedKey = extractKey(path);
 
         VaultVersionedKeyValueOperations versionedKV = vaultTemplate.opsForVersionedKeyValue(mountPoint);
-        Versioned<HashMap> versionedResponse;
+        Versioned<T> versionedResponse;
 
         try {
             if (version.isPresent()) {
-                versionedResponse = versionedKV.get(extractedKey, Version.from(version.get()), HashMap.class);
+                versionedResponse = versionedKV.get(extractedKey, Version.from(version.get()), clazz);
             } else {
-                versionedResponse = versionedKV.get(extractedKey, HashMap.class);
+                versionedResponse = versionedKV.get(extractedKey, clazz);
             }
 
             if (versionedResponse != null) {

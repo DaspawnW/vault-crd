@@ -69,5 +69,15 @@ spec:
                   type: object
                 files:
                   type: object
+            dockerCfgConfiguration:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - KEYVALUE
+                    - KEYVALUEV2
+                version:
+                  type: integer
           required:
             - type

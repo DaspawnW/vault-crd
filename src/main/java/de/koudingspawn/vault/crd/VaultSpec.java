@@ -1,12 +1,9 @@
 package de.koudingspawn.vault.crd;
 
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
-@JsonDeserialize(
-        using = JsonDeserializer.None.class
-)
+@JsonDeserialize
 public class VaultSpec implements KubernetesResource {
     private String path;
     private VaultType type;
@@ -14,6 +11,7 @@ public class VaultSpec implements KubernetesResource {
     private VaultJKSConfiguration jksConfiguration;
     private VaultVersionedConfiguration versionConfiguration;
     private VaultPropertiesConfiguration propertiesConfiguration;
+    private VaultDockerCfgConfiguration dockerCfgConfiguration;
 
     public String getPath() {
         return path;
@@ -61,5 +59,13 @@ public class VaultSpec implements KubernetesResource {
 
     public void setPropertiesConfiguration(VaultPropertiesConfiguration propertiesConfiguration) {
         this.propertiesConfiguration = propertiesConfiguration;
+    }
+
+    public VaultDockerCfgConfiguration getDockerCfgConfiguration() {
+        return dockerCfgConfiguration;
+    }
+
+    public void setDockerCfgConfiguration(VaultDockerCfgConfiguration dockerCfgConfiguration) {
+        this.dockerCfgConfiguration = dockerCfgConfiguration;
     }
 }
