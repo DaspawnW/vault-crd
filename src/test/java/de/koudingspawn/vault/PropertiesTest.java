@@ -11,14 +11,14 @@ import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -30,9 +30,7 @@ import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static de.koudingspawn.vault.Constants.LAST_UPDATE_ANNOTATION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
@@ -40,9 +38,6 @@ import static org.junit.Assert.assertTrue;
                 "kubernetes.vault.url=http://localhost:8208/v1/",
                 "kubernetes.initial-delay=5000000",
                 "kubernetes.vault.token=c73ab0cb-41e6-b89c-7af6-96b36f1ac87b"
-        },
-        classes = {
-                TestConfiguration.class
         }
 
 )
@@ -59,7 +54,21 @@ public class PropertiesTest {
     public EventHandler handler;
 
     @Autowired
-    KubernetesClient client;
+    public KubernetesClient client;
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class KindConfig {
+
+        @Bean
+        @Primary
+        public KubernetesClient client() {
+            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+            TestHelper.createCrd(kubernetesClient);
+
+            return kubernetesClient;
+        }
+
+    }
 
     @Autowired
     CertRefresh certRefresh;
@@ -117,6 +126,12 @@ public class PropertiesTest {
         vault.setSpec(vaultSpec);
 
         return vault;
+    }
+
+    @AfterClass
+    public static void cleanupK8S() {
+        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
+        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }
