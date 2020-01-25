@@ -177,6 +177,15 @@ public class DockerCfgTest {
         assertFalse(dockerCfgRefresh.refreshIsNeeded(vault));
     }
 
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace("default").withName("dockercfg").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("dockercfg").cascading(true).delete();
+        }
+    }
+
     @AfterClass
     public static void cleanupK8S() {
         KubernetesClient kubernetesClient = new DefaultKubernetesClient();

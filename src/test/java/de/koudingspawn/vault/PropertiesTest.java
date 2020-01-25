@@ -102,6 +102,15 @@ public class PropertiesTest {
         assertTrue(renderedProperties.contains("test3=contextvalue"));
     }
 
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace("default").withName("properties").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("properties").cascading(true).delete();
+        }
+    }
+
     private Vault generatePropertiesManifest() throws IOException {
         HashMap<String, String> properties = new HashMap<>();
         File file = new ClassPathResource("test.properties").getFile();

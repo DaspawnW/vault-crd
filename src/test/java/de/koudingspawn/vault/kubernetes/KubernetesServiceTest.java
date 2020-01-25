@@ -3,9 +3,7 @@ package de.koudingspawn.vault.kubernetes;
 import de.koudingspawn.vault.TestHelper;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.vault.VaultSecret;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.junit.After;
@@ -29,6 +27,9 @@ public class KubernetesServiceTest {
 
     private static String COMPARE = "COMPARE";
     private static String CRDNAME = "CRDNAME";
+    
+    private static String NAMESPACE = "test";
+    private static String SECRETNAME = "testsecret";
 
     @Autowired
     public KubernetesClient client;
@@ -52,6 +53,9 @@ public class KubernetesServiceTest {
     @Before
     public void setUp() {
         kubernetesService = new KubernetesService(client, CRDNAME);
+
+        Namespace ns = new NamespaceBuilder().withMetadata(new ObjectMetaBuilder().withName(NAMESPACE).build()).build();
+        client.namespaces().createOrReplace(ns);
     }
 
     @Test
@@ -59,7 +63,7 @@ public class KubernetesServiceTest {
         Vault vault = generateVault();
 
         Secret testsecret = generateSecret();
-        client.secrets().inNamespace("default").create(testsecret);
+        client.secrets().inNamespace(NAMESPACE).create(testsecret);
 
         boolean exists = kubernetesService.exists(vault);
 
@@ -82,7 +86,7 @@ public class KubernetesServiceTest {
 
         kubernetesService.createSecret(vault, vaultSecret);
 
-        Secret secret = client.secrets().inNamespace("default").withName("testsecret").get();
+        Secret secret = client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get();
         assertEquals("dmFsdWU=", secret.getData().get("key")); // value
         assertEquals("Opaque", secret.getType());
         assertEquals(COMPARE, secret.getMetadata().getAnnotations().get(CRDNAME + COMPARE_ANNOTATION));
@@ -93,19 +97,19 @@ public class KubernetesServiceTest {
     public void shouldDeleteSecret() {
         Secret secret = generateSecret();
 
-        client.secrets().inNamespace("default").create(secret);
+        client.secrets().inNamespace(NAMESPACE).create(secret);
 
-        assertNotNull(client.secrets().inNamespace("default").withName("testsecret").get());
+        assertNotNull(client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get());
 
         kubernetesService.deleteSecret(generateVault().getMetadata());
 
-        assertNull(client.secrets().inNamespace("default").withName("testsecret").get());
+        assertNull(client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get());
     }
 
     @Test
     public void shouldModifySecret() {
         Secret secret = generateSecret();
-        client.secrets().inNamespace("default").create(secret);
+        client.secrets().inNamespace(NAMESPACE).create(secret);
 
         Vault vault = generateVault();
         HashMap<String, String> data = new HashMap<>();
@@ -114,12 +118,21 @@ public class KubernetesServiceTest {
 
         kubernetesService.modifySecret(vault, modifiedVaultSecret);
 
-        Secret foundSecret = client.secrets().inNamespace("default").withName("testsecret").get();
+        Secret foundSecret = client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get();
 
         assertEquals(COMPARE + "NEW", foundSecret.getMetadata().getAnnotations().get(CRDNAME + COMPARE_ANNOTATION));
         assertEquals("Opaque", foundSecret.getType());
         assertEquals("dmFsdWUx", foundSecret.getData().get("key1"));
         assertNull(foundSecret.getData().get("key"));
+    }
+
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get();
+        if (secret != null) {
+            client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).cascading(true).delete();
+        }
     }
 
     private Secret generateSecret() {
@@ -128,7 +141,7 @@ public class KubernetesServiceTest {
 
         return new SecretBuilder()
                 .withNewMetadata()
-                    .withName("testsecret")
+                    .withName(SECRETNAME)
                 .endMetadata()
                 .addToData(data)
                 .build();
@@ -143,16 +156,11 @@ public class KubernetesServiceTest {
     private Vault generateVault() {
         Vault vault = new Vault();
         ObjectMeta meta = new ObjectMeta();
-        meta.setNamespace("default");
-        meta.setName("testsecret");
+        meta.setNamespace(NAMESPACE);
+        meta.setName(SECRETNAME);
         vault.setMetadata(meta);
 
         return vault;
-    }
-
-    @After
-    public void delete() {
-        client.secrets().inNamespace("default").delete(client.secrets().inNamespace("default").list().getItems());
     }
 
     @AfterClass

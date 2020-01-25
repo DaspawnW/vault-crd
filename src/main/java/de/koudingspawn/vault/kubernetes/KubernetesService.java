@@ -54,7 +54,7 @@ public class KubernetesService {
     }
 
     void deleteSecret(ObjectMeta resourceMetadata) {
-        client.secrets().inNamespace(resourceMetadata.getNamespace()).withName(resourceMetadata.getName()).delete();
+        client.secrets().inNamespace(resourceMetadata.getNamespace()).withName(resourceMetadata.getName()).cascading(true).delete();
         log.info("Deleted secret {} in namespace {}", resourceMetadata.getName(), resourceMetadata.getNamespace());
     }
 

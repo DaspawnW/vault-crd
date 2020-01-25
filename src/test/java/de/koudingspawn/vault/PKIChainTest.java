@@ -141,6 +141,15 @@ public class PKIChainTest {
         assertEquals(keyPair.getPrivate_key().replaceAll("\\\\n", "").replaceAll("\\n", ""), key.replaceAll("\\n", ""));
     }
 
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace("default").withName("pki").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("pki").cascading(true).delete();
+        }
+    }
+
     private VaultResponseData generateKeyPair() {
         String certificate = "-----BEGIN CERTIFICATE-----\\n" +
                 "MIIDZjCCAk6gAwIBAgIUc8PIl50sEQM28x6CV7iK6fae4t4wDQYJKoZIhvcNAQEL\\n" +

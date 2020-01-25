@@ -226,6 +226,15 @@ public class CertTest {
         assertTrue(certRefresh.refreshIsNeeded(vault));
     }
 
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace("default").withName("certificate").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("certificate").cascading(true).delete();
+        }
+    }
+
     @AfterClass
     public static void cleanupK8S() {
         KubernetesClient kubernetesClient = new DefaultKubernetesClient();

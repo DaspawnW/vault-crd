@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -33,6 +34,7 @@ import static org.junit.Assert.*;
                 "kubernetes.vault.url=http://localhost:8207/v1/"
         }
 )
+@ActiveProfiles("test")
 public class KeyValueV2Test {
 
     @ClassRule
@@ -49,7 +51,7 @@ public class KeyValueV2Test {
     public KeyValueV2Refresh keyValueV2Refresh;
 
     @Autowired
-    public KubernetesClient testClient;
+    public KubernetesClient client;
 
     @org.springframework.boot.test.context.TestConfiguration
     static class KindConfig {
@@ -68,7 +70,7 @@ public class KeyValueV2Test {
     @Before
     public void before() {
         WireMock.resetAllScenarios();
-        testClient.secrets().inAnyNamespace().delete();
+        client.secrets().inAnyNamespace().delete();
 
         TestHelper.generateLookupSelfStub();
     }
@@ -110,7 +112,7 @@ public class KeyValueV2Test {
 
         handler.addHandler(vault);
 
-        Secret secret = testClient.secrets().inNamespace("default").withName("simple").get();
+        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
         assertEquals("simple", secret.getMetadata().getName());
         assertEquals("default", secret.getMetadata().getNamespace());
         assertEquals("Opaque", secret.getType());
@@ -267,7 +269,7 @@ public class KeyValueV2Test {
 
         handler.addHandler(vault);
 
-        Secret secret = testClient.secrets().inNamespace("default").withName("simple").get();
+        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
         assertEquals("simple", secret.getMetadata().getName());
         assertEquals("default", secret.getMetadata().getNamespace());
         assertEquals("Opaque", secret.getType());
@@ -275,6 +277,15 @@ public class KeyValueV2Test {
         assertEquals("dmFsdWUy", secret.getData().get("nested"));
         assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
         assertEquals("z/SCo8oELBDAF2DQvX2H3yLs6vvn55Z6c8fdS3Y7l64=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
+    }
+
+    @Before
+    @After
+    public void cleanupAfterJob() {
+        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("simple").cascading(true).delete();
+        }
     }
 
     @AfterClass
