@@ -180,6 +180,15 @@ public class KeyValueTest {
         assertEquals("dYxf3NXqZ1l2d1YL1htbVBs6EUot33VjoBUUrBJg1eY=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
     }
 
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("simple").cascading(true).delete();
+        }
+    }
+
     @AfterClass
     public static void cleanupK8S() {
         KubernetesClient kubernetesClient = new DefaultKubernetesClient();

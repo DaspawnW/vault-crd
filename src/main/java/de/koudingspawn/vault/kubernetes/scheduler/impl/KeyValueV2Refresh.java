@@ -25,10 +25,10 @@ public class KeyValueV2Refresh extends CompareHash implements RequiresRefresh {
     }
 
     public boolean refreshIsNeeded(Vault resource) throws SecretNotAccessibleException {
-        return certHashHasChanged(resource);
+        return hashHasChanged(resource);
     }
 
-    private boolean certHashHasChanged(Vault resource) throws SecretNotAccessibleException {
+    private boolean hashHasChanged(Vault resource) throws SecretNotAccessibleException {
         Secret secretByVault = kubernetesService.getSecretByVault(resource);
         String vaultSha256 = typedSecretGeneratorFactory.get("KEYVALUEV2GENERATOR").getHash(resource.getSpec());
 

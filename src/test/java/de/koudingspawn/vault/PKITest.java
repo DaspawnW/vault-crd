@@ -142,6 +142,15 @@ public class PKITest {
         assertEquals(keyPair.getPrivate_key().replaceAll("\\\\n", ""), key.replaceAll("\\n", ""));
     }
 
+    @After
+    @Before
+    public void cleanup() {
+        Secret secret = client.secrets().inNamespace("default").withName("pki").get();
+        if (secret != null) {
+            client.secrets().inNamespace("default").withName("pki").cascading(true).delete();
+        }
+    }
+
     private VaultResponseData generateKeyPair(Date startDate, long valid) throws Exception {
         CertAndKeyGen certGen = new CertAndKeyGen("RSA", "SHA256WithRSA");
         certGen.generate(2048);

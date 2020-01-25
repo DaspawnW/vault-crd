@@ -4,7 +4,6 @@ metadata:
   name: vault.koudingspawn.de
 spec:
   group: koudingspawn.de
-  version: v1
   scope: Namespaced
   names:
     plural: vault
@@ -12,6 +11,10 @@ spec:
     kind: Vault
     shortNames:
       - vt
+  versions:
+    - name: v1
+      served: true
+      storage: true
   validation:
     openAPIV3Schema:
       properties:
