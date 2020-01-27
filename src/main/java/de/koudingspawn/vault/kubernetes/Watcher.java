@@ -30,7 +30,7 @@ public class Watcher {
     @Bean
     CommandLineRunner watchForResource() {
         return (args) -> {
-            customResource.watch(new io.fabric8.kubernetes.client.Watcher<Vault>() {
+            customResource.inAnyNamespace().watch(new io.fabric8.kubernetes.client.Watcher<Vault>() {
                 @Override
                 public void eventReceived(Action action, Vault resource) {
                     log.info("Received action: {} for {} in namespace {}", action.name(), resource.getMetadata().getName(), resource.getMetadata().getNamespace());
