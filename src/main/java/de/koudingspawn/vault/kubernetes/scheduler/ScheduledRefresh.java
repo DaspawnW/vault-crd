@@ -36,7 +36,7 @@ public class ScheduledRefresh {
     public void refreshCertificates() {
         log.info("Start refresh of secret...");
 
-        VaultList list = customResource.list();
+        VaultList list = customResource.inAnyNamespace().list();
         for (Vault resource : list.getItems()) {
             RequiresRefresh requiresRefresh = typeRefreshFactory.get(resource.getSpec().getType().toString());
             try {
