@@ -87,10 +87,14 @@ public class KubernetesService {
         ObjectMeta meta = new ObjectMeta();
         meta.setNamespace(resource.getNamespace());
         meta.setName(resource.getName());
-        meta.setLabels(resource.getLabels());
+        if (resource.getLabels() != null) {
+            meta.setLabels(resource.getLabels());
+        }
 
         HashMap<String, String> annotations = new HashMap<>();
-        annotations.putAll(resource.getAnnotations());
+        if (resource.getAnnotations() != null) {
+            annotations.putAll(resource.getAnnotations());
+        }
         annotations.put(crdName + LAST_UPDATE_ANNOTATION, LocalDateTime.now().toString());
         annotations.put(crdName + COMPARE_ANNOTATION, compare);
         meta.setAnnotations(annotations);
