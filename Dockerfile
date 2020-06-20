@@ -1,15 +1,17 @@
-FROM openjdk:8-alpine AS BUILD
+FROM openjdk:8 AS BUILD
 
 COPY . /opt
 WORKDIR /opt
 RUN ./mvnw clean install -DskipTests
 
+ENV JAVA_RANDOM="file:/dev/./urandom"
+RUN echo "networkaddress.cache.ttl=60" >> /usr/local/openjdk-8/jre/lib/security/java.security
+RUN sed -i -e "s@^securerandom.source=.*@securerandom.source=${JAVA_RANDOM}@" /usr/local/openjdk-8/jre/lib/security/java.security
 
-FROM openjdk:8-alpine
+FROM gcr.io/distroless/java:8
 
 COPY --from=BUILD /opt/target/vault-crd.jar /opt/vault-crd.jar
-WORKDIR /opt
+COPY --from=BUILD /usr/local/openjdk-8/jre/lib/security/java.security /etc/java-8-openjdk/security/java.security
 
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
-
-ENTRYPOINT java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar vault-crd.jar
+ENTRYPOINT ["/usr/bin/java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-Djavax.net.ssl.trustStoreType=jks"]
+CMD ["-jar", "/opt/vault-crd.jar"]
