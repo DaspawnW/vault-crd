@@ -79,8 +79,10 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
+          type: object
           properties:
             spec:
+              type: object
               properties:
                 path:
                   type: string
@@ -129,8 +131,10 @@ spec:
                   properties:
                     context:
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     files:
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                 dockerCfgConfiguration:
                   type: object
                   properties:
@@ -164,9 +168,22 @@ spec:
         app: vault-crd
     spec:
       serviceAccountName: vault-crd-serviceaccount
+#      initContainers:
+#        - name: convert-https
+#          image: shamelesscookie/openssl:1.1.1g
+#          command:
+#            - /bin/bash
+#          args:
+#            - "-c"
+#            - "openssl pkcs12 -export -in /opt/certificate/tls.crt -inkey /opt/certificate/tls.key -out /opt/target/keystore.p12 -passout pass:changeit -name admission-tls"
+#          volumeMounts:
+#            - mountPath: /opt/certificate
+#              name: pem-cert
+#            - mountPath: /opt/target
+#              name: pkcs12-cert
       containers:
       - name: vault-crd
-        image: daspawnw/vault-crd:1.4.3
+        image: daspawnw/vault-crd:1.5.0
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
@@ -175,15 +192,35 @@ spec:
             secretKeyRef:
               name: vault-token
               key: token
+#        - name: SERVER_SSL_KEY-STORE-TYPE
+#          value: PKCS12
+#        - name: SERVER_SSL_KEY-STORE
+#          value: "/opt/certificate/keystore.p12"
+#        - name: SERVER_SSL_KEY-STORE-PASSWORD
+#          value: changeit
+#        - name: SERVER_SSL_KEY-ALIAS
+#          value: "admission-tls"
+        ports:
+          - containerPort: 8080
         livenessProbe:
           httpGet:
             port: 8080
             path: "/actuator/health"
+#            scheme: HTTPS
           initialDelaySeconds: 30
           failureThreshold: 3
           periodSeconds: 30
           successThreshold: 1
           timeoutSeconds: 5
+#        volumeMounts:
+#          - mountPath: /opt/certificate
+#            name: pkcs12-cert
+#      volumes:
+#        - name: pem-cert
+#          secret:
+#            secretName: vault-crd-tls
+#        - name: pkcs12-cert
+#          emptyDir: {}
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -192,4 +229,13 @@ metadata:
   name: vault-token
   namespace: vault-crd
 data:
-  token: "ODQ4M2VjMTMtMzJiZC1hOTE0LWFmMmItYWRkNTY4ODJhMWUz"
+  token: "cm9vdA=="
+---
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: vault-crd-tls
+#  namespace: vault-crd
+#data:
+#  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURjakNDQWxxZ0F3SUJBZ0lVY3d6Z0hrdjRhOXpHOE5hQm1rbVFPdGxZM3hjd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0dqRVlNQllHQTFVRUF4TVBhMjkxWkdsdVozTndZWGR1TG1SbE1CNFhEVEl3TURZeU5ERTVNVEExTUZvWApEVEl3TURjeU5qRTVNVEV5TUZvd0hqRWNNQm9HQTFVRUF4TVRkbUYxYkhRdFkzSmtMblpoZFd4MExXTnlaRENDCkFTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTG84Z2lWMjQ5UTArazMvenFnY2xVN3oKTisyT2N1VDNERG5JbXZaYTNiOXZGYjRXNVhOaXlpT0xtbHhnMDB3RGkyV01DcEI1RldmRUQwQU5KQUpWMEdRdwowVmlFTG5TVDRJYTRUcTlxUWlvc0J0RXd5Vkx1QkZSU1RHTDJiSUV5K3dBaGlrQ3dmbEI2L2trN05VbHlXZG8rCkRtcUorbDQ4RnVkbytpdTJyYkxtR0lnMTFDTy8rUTJlRnZCaTBaTTZEUzliUVNYOUYxTmMxdFZyNndtSWNOTHQKNzRHT2JQaG5rbFBaQjMrUzRFTk8xbHhzcCtkNGw0QkZEYWJWMHdCdWVmaFdqdktMSlZNRzlOWWZkWjdBaXArZwpYWWhpYVpPQS9xTlhSTDQzWlY1OXBBS2NtNWlFdUFLMStrYVBuWUdYQUtRRFE3L29hSlJwbEVqT1VLVHRObDBDCkF3RUFBYU9CcXpDQnFEQU9CZ05WSFE4QkFmOEVCQU1DQTZnd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3RUcKQ0NzR0FRVUZCd01DTUIwR0ExVWREZ1FXQkJRNjFvN2cwVllHc2pZZTJ2bkVKQ29LTElvYnREQWZCZ05WSFNNRQpHREFXZ0JTUWVUMmtiWWZqTFptd1VOQlY3aHRRdUdIVDZUQTNCZ05WSFJFRU1EQXVnaE4yWVhWc2RDMWpjbVF1CmRtRjFiSFF0WTNKa2doZDJZWFZzZEMxamNtUXVkbUYxYkhRdFkzSmtMbk4yWXpBTkJna3Foa2lHOXcwQkFRc0YKQUFPQ0FRRUFSVTVud05rb24xRWdxZWVQNnRHZzZiNmY5TC94cnd5bHFndURyWVJOUmIyeGl1ZTV0UDREZFNVZAo2eXBVNXdsWGdHTmlmcHBpeVhSbFlIZUtIT09jRUtlTlByb25KYnBaa25Wb3ZpaVU2aWhJNFBLM3lRRW51N2twCjhjdldxVDh2WVVJa2VwV0dEd2NYRTRNNWlSelJ5VXVYSkxXZk4yRnJjTlJ1RUdEL3JKRFlwQ00rTDNDd0U5TFgKbmFCaDRJTG1HZjJmMHpZaVZMWTN0bTF4c1E2ZGZCQlZMMHZDZmlBVzlKYkNGbTVSOXRySWttcXdBY09lQTFGUApMdExUNjJ5OHRZbjFFK0h6ZTVneVRBdXpoRHhHbmxXRGtkRDJVSXMrbUxqcWxOVzZrcTI0NHFJOUdZZ3drVFJiCm1DOURyZ2lFRWFIQi9yN2lBZVNaWHZkUzg2ckVpZz09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+#  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBdWp5Q0pYYmoxRFQ2VGYvT3FCeVZUdk0zN1k1eTVQY01PY2lhOWxyZHYyOFZ2aGJsCmMyTEtJNHVhWEdEVFRBT0xaWXdLa0hrVlo4UVBRQTBrQWxYUVpERFJXSVF1ZEpQZ2hyaE9yMnBDS2l3RzBUREoKVXU0RVZGSk1ZdlpzZ1RMN0FDR0tRTEIrVUhyK1NUczFTWEpaMmo0T2FvbjZYandXNTJqNks3YXRzdVlZaURYVQpJNy81RFo0VzhHTFJrem9OTDF0QkpmMFhVMXpXMVd2ckNZaHcwdTN2Z1k1cytHZVNVOWtIZjVMZ1EwN1dYR3luCjUzaVhnRVVOcHRYVEFHNTUrRmFPOG9zbFV3YjAxaDkxbnNDS242QmRpR0pwazREK28xZEV2amRsWG4ya0FweWIKbUlTNEFyWDZSbytkZ1pjQXBBTkR2K2hvbEdtVVNNNVFwTzAyWFFJREFRQUJBb0lCQUh5TjhXRUxGYTZjUy9lVQpxV3NIeXRnRmxKY2RtVHdHK2pjL01seW5RdjFBVnlOTi91RmY1ZDlHQTlQYXNoWjVuR1lxOWZuUDhYLzN3VmRPCk1wSVpRSWx4bU9HQmJleHI1bE5UdXRSWTFhMk15blpvRVkyVVFITUFvN1BnS1l0elJDbS9STTZrKzZYcHpGMi8KNnBDWG1QNThXSG5xay9jb2F3MFR5WlVvMVJ6NjMvemxSYXJBMXdqQVVGMDNJRElNTFlzYWxCZld5Nm9neEhHZQpuOC95Z1E4cyt5Z29UY3FZb1hHYnZ2a01IOVB6b1oyZko3RWlrTW9Cb29jcjRxbjZZYUFIb3BJR0dMYmM5MFdsCmZVUHBheEtkcDMzUTlXK1MzbU11bm9zUk9MbHdqMS9HTHhaKzJWRkZqUTJseHpBOGdqOW1SV0tabzhQYnVHUVEKU0p4cFhVRUNnWUVBNnZhWDFQSm4yUUNxeCtET3k4SnZFNWp6WVBGcTlFR0FpRFg5VENTb3R4U1d2OTVOUVh0MQpBR1d1RmVETE1YSmZqejhibldwdVVuVzRqK0tNRnRaUDNMZ1Nmd3ZTUnVnNGVsQ1RHVEllWmJmQ0pqTGlrNVNPCjJ6SVBiK2xtL3Z3eXU5V3NkZEh3OVIyUjc3eWlzWkkxZlBDMndTTzZzRjlxT21rL2t1RGZibzBDZ1lFQXl1a1YKcjI3andnM2FpMEJLdTNhcmhSRExqbklzSnF5Qy9yUVJEUzlVQjVuTks1L1l4K1o4S0R5M2toMmV2YXNic1Q0cgozcFUxQXdKOGZDQnRXaC93YXRVYlNRZkNOQ0ppZ2hsbUpYcTJDeEVRUUllN1d5MGpNeWpINzJodVgwMGY0dFJWCkt1clVpK2V0SjA3NHBvbHNUaG9DUnZqbzdyaHREY3R3UmM2bUd4RUNnWUVBdUNoS1hJY1p5Y1Z5RlhNbjRpQWsKdXpGNElCVllCTldLRGpoeXJVbFdTeGlDQnlRUFhUR01SS0Z0VG94LzllTjA3bXRDRTZFbGtzL2R0amlVSUJvZApRaHVyczVQcVhkVUkzeVZrQmExNGtiVHpJTWxsT05LSkhWZ2hMVSs4Z0VIZTZjWFJoQTdtVXRlNFdEUjdONzRtCjJpUTR1U3h0MkdzUWNYT29kbEIyRHNrQ2dZRUF5VDZwZ2toaDNlbnRrZVNlK2hSMWd0RW9na3ZjWERNRzdPVGMKY0k0N01ocXBjWlhrNUVaRlo0Ym9yaU53ZUQ3SGhWL2JGTFE1VXBYWnJ5WmVMbCsxQzgvMmN0VWVHS1R0dklqQwpWWFBDTDNHcUE4WmEzTkFFdEUzREZrQW1ENkVuZWNvTCtqZlR2RHAzOHArUlgySzJwek9HaEt1RUlwZUptWC9uCkIyVXdPM0VDZ1lFQTRYK25CRkRsNEdXbFNQU2VKZzZ4L3JWUXFyZUkwcmIrSUViNGhGOVZBcndEc2Z6L0hnb3cKSGpDTkR0N2t0YlJVTzlsNTJaZ3YrbWlOS3Z5dnNCbUNQalA5d0k4Y2hUZlhOZ1ZIYzE5YzJLTWRxTkdIckw1YwpTdytHMkl3MFRjREpQeFZyNGxkN01NNFZtYmtIKzBUVEtyVThLWkZQc2o2RGYraS9mMSs0NEE0PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=

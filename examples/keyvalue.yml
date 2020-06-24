@@ -3,5 +3,5 @@ kind: Vault
 metadata:
   name: test-keyvalue
 spec:
-  path: "secret/docker-hub"
+  path: "keyvaluev1/docker-hub"
   type: "KEYVALUE"

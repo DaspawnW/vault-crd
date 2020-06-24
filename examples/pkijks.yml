@@ -6,5 +6,5 @@ spec:
   path: "testpki/issue/testrole"
   type: "PKIJKS"
   pkiConfiguration:
-    commonName: "localhost"
+    commonName: "vault.koudingspawn.de"
     ttl: "7m"

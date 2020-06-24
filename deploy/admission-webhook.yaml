@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-crd
+  namespace: vault-crd
+spec:
+  selector:
+    app: vault-crd
+  ports:
+    - port: 8080
+  type: ClusterIP
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    app: vault-crd
+  name: vault-crd-admission
+webhooks:
+  - name: validate.vault.koudingspawn.de
+    admissionReviewVersions: ["v1beta1"]
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - koudingspawn.de
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - vault
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        namespace: vault-crd
+        name: vault-crd
+        path: /validation/vault-crd
+        port: 8080
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURRVENDQWltZ0F3SUJBZ0lVUDk4cG9lNXF0TVExWXhrVS85eHc5ZGp4N05Bd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0dqRVlNQllHQTFVRUF4TVBhMjkxWkdsdVozTndZWGR1TG1SbE1CNFhEVEl3TURZeU5ERTVNVEF4TkZvWApEVE13TURZeU1qRTVNVEEwTkZvd0dqRVlNQllHQTFVRUF4TVBhMjkxWkdsdVozTndZWGR1TG1SbE1JSUJJakFOCkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXNWbklIY2JCeHl2NmpOS3V5YkZpMFNkbEtONlAKU1U2RlJOUzJwQ1NNK3R3eWtCblllZUtacTMxQmZYQW5EMlVrR1dod0gwWHF1QmJ4S3Bsa2lYWVVMT25qTFQwLwpWVG5LN1U2NWFWZ0VMZlZJVFNHRnJFcjMwdTdYbWN5NkNWZmkzd25CMjZkZnR1V2NSWlFoaXIxZUE4VUZjejBQCkxlTWhiSTRybENWcnU2bHFFTzl0bGRId21ScGc5dWYyYnJiTi9PNDlaSUtYVGRBSW5jVTVacnV3d21MOVpnbUIKc2tzaDBvZWFkaXpMbzRuSmNjdVZYQjlwMHJjcjBPdG5qSHo1SGdCUElzTDB6UVZMUzVSZ01CTkxDbTVnZjlrcAp4S1UzQ0ZnU0Z0Vng5WlE3aG9hUEl3VnRqWUNrcCtzQVBycjBQNkk0Um95c2U3RDB2UERQUCs5NDF3SURBUUFCCm8zOHdmVEFPQmdOVkhROEJBZjhFQkFNQ0FRWXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QWRCZ05WSFE0RUZnUVUKa0hrOXBHMkg0eTJac0ZEUVZlNGJVTGhoMCtrd0h3WURWUjBqQkJnd0ZvQVVrSGs5cEcySDR5MlpzRkRRVmU0YgpVTGhoMCtrd0dnWURWUjBSQkJNd0VZSVBhMjkxWkdsdVozTndZWGR1TG1SbE1BMEdDU3FHU0liM0RRRUJDd1VBCkE0SUJBUUFoMW9pMy9iRW5Lb1Rxdkt2NEZZeVJKVDQzMkIxYkp2MG94ZERLaFJndVowYmQ1WXVOMHBnNTcxL2QKb1UvVUN6ellzaUVYZmw3NHREUndNWVUveXhlQVJKQ3B2RWswcVhOdHJlS1hZL0dDU0wxbjlKU1dTMk1xVDBBeQpuTWxqdEkrd3R5Ujh2MW05SnppNFdFNHdWdVRuclhlb1BSeVpKR0F1Q2xRbnk2VW5Fei9LS3ZvQ0pCQW1UY1NKCk5hZkNwYUh3b25sQVp5bXZRN0JQZHZoMk52ckdQazk2aEVZc1lnUVl6VW5KcURoT0Z2RWF1MjRLeEk2NlpXUnIKMGlSNkZmTTQ2ZjBNRVdqdmRSUGRucHh2dDhPbTBiNjVER0czc2hVTHNLZWJENFI4YjdCeTdrVUV0U1FkNVkzcwpHK1k5RTdpbXdWR1hlUTh1eWw3ZGNSV1AwTkJ1Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K

@@ -5,3 +5,5 @@ metadata:
 spec:
   path: "keyvaluev2/example"
   type: "KEYVALUEV2"
+  versionConfiguration:
+    version: 2

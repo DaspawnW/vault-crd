@@ -3,5 +3,5 @@ kind: Vault
 metadata:
   name: test-cert
 spec:
-  path: "secret/test-url.example.com"
+  path: "keyvaluev1/vault.koudingspawn.de"
   type: "CERT"
