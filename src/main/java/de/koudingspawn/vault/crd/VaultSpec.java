@@ -12,6 +12,7 @@ public class VaultSpec implements KubernetesResource {
     private VaultVersionedConfiguration versionConfiguration;
     private VaultPropertiesConfiguration propertiesConfiguration;
     private VaultDockerCfgConfiguration dockerCfgConfiguration;
+    private VaultChangeAdjustmentCallback changeAdjustmentCallback;
 
     public String getPath() {
         return path;
@@ -67,5 +68,13 @@ public class VaultSpec implements KubernetesResource {
 
     public void setDockerCfgConfiguration(VaultDockerCfgConfiguration dockerCfgConfiguration) {
         this.dockerCfgConfiguration = dockerCfgConfiguration;
+    }
+
+    public VaultChangeAdjustmentCallback getChangeAdjustmentCallback() {
+        return changeAdjustmentCallback;
+    }
+
+    public void setChangeAdjustmentCallback(VaultChangeAdjustmentCallback changeAdjustmentCallback) {
+        this.changeAdjustmentCallback = changeAdjustmentCallback;
     }
 }

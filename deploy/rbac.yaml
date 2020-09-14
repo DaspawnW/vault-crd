@@ -42,6 +42,15 @@ rules:
       - patch
       - update
       - delete
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - update
+      - get
+      - patch
 
 ---
 
@@ -145,6 +154,13 @@ spec:
                         - KEYVALUEV2
                     version:
                       type: integer
+                changeAdjustmentCallback:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    name:
+                      type: string
               required:
                 - type
 
@@ -183,7 +199,7 @@ spec:
 #              name: pkcs12-cert
       containers:
       - name: vault-crd
-        image: daspawnw/vault-crd:1.5.0
+        image: daspawnw/vault-crd:1.6.0
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
