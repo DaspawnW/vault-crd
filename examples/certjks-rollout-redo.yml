@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: nginx
+
+
+---
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-rollout-redo-certjks
+spec:
+  path: "keyvaluev1/vault.koudingspawn.de"
+  type: "CERTJKS"
+  changeAdjustmentCallback:
+    type: deployment
+    name: nginx

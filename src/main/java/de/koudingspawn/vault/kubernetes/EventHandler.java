@@ -15,10 +15,12 @@ public class EventHandler {
 
     private final VaultService vaultService;
     private final KubernetesService kubernetesService;
+    private final ChangeAdjustmentService changeAdjustmentService;
 
-    public EventHandler(VaultService vaultService, KubernetesService kubernetesService) {
+    public EventHandler(VaultService vaultService, KubernetesService kubernetesService, ChangeAdjustmentService changeAdjustmentService) {
         this.vaultService = vaultService;
         this.kubernetesService = kubernetesService;
+        this.changeAdjustmentService = changeAdjustmentService;
     }
 
     public void addHandler(Vault resource) {
@@ -42,6 +44,10 @@ public class EventHandler {
         try {
             VaultSecret secretContent = vaultService.generateSecret(resource);
             kubernetesService.modifySecret(resource, secretContent);
+
+            if (resource.getSpec().getChangeAdjustmentCallback() != null) {
+                changeAdjustmentService.handle(resource);
+            }
         } catch (SecretNotAccessibleException e) {
             log.error("Failed to modify secret for vault resource {} in namespace {} failed with exception:",
                     resource.getMetadata().getName(), resource.getMetadata().getNamespace(), e);

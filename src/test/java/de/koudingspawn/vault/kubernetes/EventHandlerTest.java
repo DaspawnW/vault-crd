@@ -1,6 +1,7 @@
 package de.koudingspawn.vault.kubernetes;
 
 import de.koudingspawn.vault.crd.Vault;
+import de.koudingspawn.vault.crd.VaultSpec;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.VaultService;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
@@ -60,6 +61,7 @@ public class EventHandlerTest {
     @Test
     public void shouldModifySecret() throws SecretNotAccessibleException {
         Vault vault = new Vault();
+        vault.setSpec(new VaultSpec());
         VaultSecret vaultSecret = new VaultSecret(new HashMap<>(), "COMPARE");
 
         when(vaultService.generateSecret(vault)).thenReturn(vaultSecret);
@@ -71,6 +73,7 @@ public class EventHandlerTest {
     @Test
     public void shouldDoNothingIfCreateSecretForModificationFails() throws SecretNotAccessibleException {
         Vault vault = new Vault();
+        vault.setSpec(new VaultSpec());
 
         when(vaultService.generateSecret(vault)).thenThrow(SecretNotAccessibleException.class);
         eventHandler.modifyHandler(vault);
