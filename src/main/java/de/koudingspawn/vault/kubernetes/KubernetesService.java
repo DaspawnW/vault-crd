@@ -69,7 +69,7 @@ public class KubernetesService {
         }
 
         secret.setType(vaultSecret.getType());
-        updateAnnotations(secret, vaultSecret.getCompare());
+        secret.setMetadata(metaData(resource.getMetadata(), vaultSecret.getCompare()));
         secret.setData(vaultSecret.getData());
 
         secretDoneableSecretResource.createOrReplace(secret);
@@ -99,16 +99,5 @@ public class KubernetesService {
         annotations.put(crdName + COMPARE_ANNOTATION, compare);
         meta.setAnnotations(annotations);
         return meta;
-    }
-
-
-    private void updateAnnotations(Secret secret, String compare) {
-        if (secret.getMetadata().getAnnotations() == null) {
-            secret.getMetadata().setAnnotations(new HashMap<>());
-        }
-
-        Map<String, String> annotations = secret.getMetadata().getAnnotations();
-        annotations.put(crdName + LAST_UPDATE_ANNOTATION, LocalDateTime.now().toString());
-        annotations.put(crdName + COMPARE_ANNOTATION, compare);
     }
 }
