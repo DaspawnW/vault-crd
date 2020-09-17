@@ -104,7 +104,7 @@ public class KubernetesService {
         boolean blockOwnerDeletion = false;
         boolean controller = true;
         OwnerReference owner = new OwnerReference(
-          "koudingspawn.de/v1",
+          crdName + "/v1",
           blockOwnerDeletion,
           controller,
           "Vault",
