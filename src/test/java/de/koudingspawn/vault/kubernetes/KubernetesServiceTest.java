@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 import static de.koudingspawn.vault.Constants.COMPARE_ANNOTATION;
 import static org.junit.Assert.*;
@@ -158,6 +159,7 @@ public class KubernetesServiceTest {
         ObjectMeta meta = new ObjectMeta();
         meta.setNamespace(NAMESPACE);
         meta.setName(SECRETNAME);
+        meta.setUid(UUID.randomUUID().toString());
         vault.setMetadata(meta);
 
         return vault;

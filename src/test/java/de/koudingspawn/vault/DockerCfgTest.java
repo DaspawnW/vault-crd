@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -86,7 +87,7 @@ public class DockerCfgTest {
     public void shouldGenerateDockerCfgFromVaultResource() throws IOException {
         Vault vault = new Vault();
         vault.setMetadata(
-            new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").build()
+            new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.DOCKERCFG);
@@ -142,7 +143,7 @@ public class DockerCfgTest {
     public void shouldCheckIfDockerCfgHasChangedAndReturnTrue() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.DOCKERCFG);
@@ -174,7 +175,7 @@ public class DockerCfgTest {
     public void shouldCheckIfDockerCfgHasChangedAndReturnFalse() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.DOCKERCFG);
@@ -197,7 +198,7 @@ public class DockerCfgTest {
     public void shouldGenerateDockerCfgV2() throws JsonProcessingException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("dockercfg").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.DOCKERCFG);

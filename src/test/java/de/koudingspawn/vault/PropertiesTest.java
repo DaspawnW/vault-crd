@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static de.koudingspawn.vault.Constants.LAST_UPDATE_ANNOTATION;
@@ -130,7 +131,7 @@ public class PropertiesTest {
 
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("properties").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("properties").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         vault.setSpec(vaultSpec);
 

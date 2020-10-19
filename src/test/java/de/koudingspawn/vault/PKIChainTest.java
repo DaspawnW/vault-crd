@@ -26,10 +26,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -252,7 +249,7 @@ public class PKIChainTest {
     private Vault generateVaultResource() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("pki").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("pki").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
 
         VaultSpec spec = new VaultSpec();

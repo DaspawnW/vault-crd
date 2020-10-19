@@ -20,6 +20,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.UUID;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
@@ -79,7 +81,7 @@ public class CertChainTest {
     public void shouldGenerateCertFromVaultResource() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("certificate").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("certificate").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.CERT);
@@ -131,7 +133,7 @@ public class CertChainTest {
     public void shouldCheckIfCertificateHasChangedAndReturnFalse() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("certificate").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("certificate").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.CERT);
@@ -169,7 +171,7 @@ public class CertChainTest {
     public void shouldCheckIfCertificateHasChangedAndReturnTrue() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("certificate").withNamespace("default").build()
+                new ObjectMetaBuilder().withName("certificate").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.CERT);

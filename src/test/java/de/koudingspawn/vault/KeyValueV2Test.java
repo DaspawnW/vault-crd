@@ -21,6 +21,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.UUID;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
@@ -79,7 +81,7 @@ public class KeyValueV2Test {
     public void shouldGenerateSimpleSecretFromVaultCustomResource() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").build());
+                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple");
@@ -125,7 +127,7 @@ public class KeyValueV2Test {
     public void shouldCheckIfSimpleSecretHasChangedAndReturnTrue() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").build());
+                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple");
@@ -195,7 +197,7 @@ public class KeyValueV2Test {
     public void shouldCheckIfSimpleSecretHasChangedAndReturnFalse() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").build());
+                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple");
@@ -235,7 +237,7 @@ public class KeyValueV2Test {
     public void shouldSupportNestedPath() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").build());
+                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple/nested");
