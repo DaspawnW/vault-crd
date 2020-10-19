@@ -4,6 +4,7 @@ import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,6 +100,21 @@ public class KubernetesService {
         annotations.put(crdName + LAST_UPDATE_ANNOTATION, LocalDateTime.now().toString());
         annotations.put(crdName + COMPARE_ANNOTATION, compare);
         meta.setAnnotations(annotations);
+
+        boolean blockOwnerDeletion = false;
+        boolean controller = true;
+        OwnerReference owner = new OwnerReference(
+          crdName + "/v1",
+          blockOwnerDeletion,
+          controller,
+          "Vault",
+          resource.getName(),
+          resource.getUid()
+        );
+        ArrayList<OwnerReference> owners = new ArrayList<>();
+        owners.add(owner);
+        meta.setOwnerReferences(owners);
+
         return meta;
     }
 }
