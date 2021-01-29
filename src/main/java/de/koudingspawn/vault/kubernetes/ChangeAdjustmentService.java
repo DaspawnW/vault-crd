@@ -25,6 +25,9 @@ public class ChangeAdjustmentService {
                 case "deployment":
                     rotateDeployment(resource.getMetadata().getNamespace(), changeAdjustmentCallback.getName());
                     break;
+                case "statefulset":
+                    rotateStatefulSet(resource.getMetadata().getNamespace(), changeAdjustmentCallback.getName());
+                    break;
                 default:
                     log.info("Currently a change adjustment is only supported for type deployment. Resource {} in namespace {} has type {}",
                             resource.getMetadata().getName(), resource.getMetadata().getNamespace(), changeAdjustmentCallback.getType());
@@ -52,6 +55,27 @@ public class ChangeAdjustmentService {
                     .done();
         } catch (Exception ex) {
             log.error("Failed to rotate deployment {} in namespace {} with exception:", name, namespace, ex);
+        }
+    }
+
+    private void rotateStatefulSet(String namespace, String name) {
+        try {
+            log.info("Start rotation of statefulSet {} in namespace {}", name, namespace);
+            client.apps()
+                    .statefulSets()
+                    .inNamespace(namespace)
+                    .withName(name)
+                    .edit()
+                    .editSpec()
+                    .editTemplate()
+                    .editMetadata()
+                    .addToAnnotations("certificate-change-on", "vault-crd_" + System.currentTimeMillis())
+                    .endMetadata()
+                    .endTemplate()
+                    .endSpec()
+                    .done();
+        } catch (Exception ex) {
+            log.error("Failed to rotate statefulSet {} in namespace {} with exception:", name, namespace, ex);
         }
     }
 }

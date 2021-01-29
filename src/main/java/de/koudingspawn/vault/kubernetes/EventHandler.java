@@ -3,7 +3,6 @@ package de.koudingspawn.vault.kubernetes;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.VaultService;
-import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,7 @@ public class EventHandler {
             try {
                 VaultSecret secretContent = vaultService.generateSecret(resource);
                 kubernetesService.createSecret(resource, secretContent);
-            } catch (SecretNotAccessibleException e) {
+            } catch (Exception e) {
                 log.error("Failed to generate secret for vault resource {} in namespace {} failed with exception:",
                         resource.getMetadata().getName(), resource.getMetadata().getNamespace(), e);
             }
@@ -48,7 +47,7 @@ public class EventHandler {
             if (resource.getSpec().getChangeAdjustmentCallback() != null) {
                 changeAdjustmentService.handle(resource);
             }
-        } catch (SecretNotAccessibleException e) {
+        } catch (Exception e) {
             log.error("Failed to modify secret for vault resource {} in namespace {} failed with exception:",
                     resource.getMetadata().getName(), resource.getMetadata().getNamespace(), e);
         }
