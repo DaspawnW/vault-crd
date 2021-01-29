@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import static de.koudingspawn.vault.Constants.COMPARE_ANNOTATION;
 import static de.koudingspawn.vault.Constants.LAST_UPDATE_ANNOTATION;
+import static de.koudingspawn.vault.Constants.COPY_LABELS_ANNOTATION;
 
 @Component
 public class KubernetesService {
@@ -89,13 +90,21 @@ public class KubernetesService {
         ObjectMeta meta = new ObjectMeta();
         meta.setNamespace(resource.getNamespace());
         meta.setName(resource.getName());
-        if (resource.getLabels() != null) {
-            meta.setLabels(resource.getLabels());
-        }
-
         HashMap<String, String> annotations = new HashMap<>();
         if (resource.getAnnotations() != null) {
             annotations.putAll(resource.getAnnotations());
+            Map<String, String> labels = resource.getLabels();
+            if (labels != null) {
+                String[] labelNames = annotations.getOrDefault(crdName + COPY_LABELS_ANNOTATION, "").split(",");
+                HashMap<String, String> secretLabels = new HashMap<>();
+                for (String labelName : labelNames) {
+                  String value = labels.get(labelName);
+                  if (value != null) {
+                    secretLabels.put(labelName, value);
+                  }
+                }
+                meta.setLabels(secretLabels);
+            }
         }
         annotations.put(crdName + LAST_UPDATE_ANNOTATION, LocalDateTime.now().toString());
         annotations.put(crdName + COMPARE_ANNOTATION, compare);
