@@ -199,7 +199,7 @@ spec:
 #              name: pkcs12-cert
       containers:
       - name: vault-crd
-        image: daspawnw/vault-crd:1.6.0
+        image: daspawnw/vault-crd:1.6.1
         env:
         - name: KUBERNETES_VAULT_URL
           value: "http://localhost:8080/v1/"
