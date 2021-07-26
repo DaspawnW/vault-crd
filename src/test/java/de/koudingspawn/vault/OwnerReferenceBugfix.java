@@ -90,7 +90,7 @@ public class OwnerReferenceBugfix {
 
         Secret secret = client.secrets().inNamespace("default").withName("properties-correct-owner-1").get();
         assertEquals(1, secret.getMetadata().getOwnerReferences().size());
-        assertEquals("koudingspawn.de/v1", secret.getMetadata().getOwnerReferences().get(0).getApiVersion());
+        assertEquals("something-not-garbage-collected.de/v1", secret.getMetadata().getOwnerReferences().get(0).getApiVersion());
     }
 
     @Test
@@ -99,8 +99,6 @@ public class OwnerReferenceBugfix {
         TestHelper.generateKV2Stup("kv2/key", ImmutableMap.of("value", "kv2content", "value2", "kv3content"));
 
         Vault vault = generatePropertiesManifest("properties-correct-owner-2");
-        customResource.inNamespace("default").withName("properties-correct-owner-2").create(vault);
-
         Secret secret = new SecretBuilder()
                 .withMetadata(
                         new ObjectMetaBuilder().withName("properties-correct-owner-2").withNamespace("default")
@@ -124,7 +122,7 @@ public class OwnerReferenceBugfix {
         Secret foundSecret = client.secrets().inNamespace("default").withName("properties-correct-owner-2").get();
         assertNotNull(foundSecret);
         assertEquals(1, foundSecret.getMetadata().getOwnerReferences().size());
-        assertEquals("koudingspawn.de/v1", foundSecret.getMetadata().getOwnerReferences().get(0).getApiVersion());
+        assertEquals("something-not-garbage-collected.de/v1", foundSecret.getMetadata().getOwnerReferences().get(0).getApiVersion());
     }
 
     @AfterClass

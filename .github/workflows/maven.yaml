@@ -11,11 +11,10 @@ jobs:
     strategy:
       matrix:
         kubernetes_version:
-          - "kindest/node:v1.18.2@sha256:7b27a6d0f2517ff88ba444025beae41491b016bc6af573ba467b70c5e8e0d85f"
-          - "kindest/node:v1.17.5@sha256:ab3f9e6ec5ad8840eeb1f76c89bb7948c77bbf76bcebe1a8b59790b8ae9a283a"
-          - "kindest/node:v1.16.9@sha256:7175872357bc85847ec4b1aba46ed1d12fa054c83ac7a8a11f5c268957fd5765"
-          - "kindest/node:v1.15.11@sha256:6cc31f3533deb138792db2c7d1ffc36f7456a06f1db5556ad3b6927641016f50"
-          - "kindest/node:v1.14.10@sha256:6cd43ff41ae9f02bb46c8f455d5323819aec858b99534a290517ebc181b443c6"
+          - "kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6"
+          - "kindest/node:v1.20.7@sha256:cbeaf907fc78ac97ce7b625e4bf0de16e3ea725daf6b04f930bd14c67c671ff9"
+          - "kindest/node:v1.19.11@sha256:07db187ae84b4b7de440a73886f008cf903fcf5764ba8106a9fd5243d6f32729"
+          - "kindest/node:v1.18.19@sha256:7af1492e19b3192a79f606e43c35fb741e520d195f96399284515f077b3b622c"
 
     steps:
       - uses: actions/checkout@v1
@@ -25,10 +24,10 @@ jobs:
         with:
           java-version: 1.8
 
-      - uses: engineerd/setup-kind@v0.5.0
+      - uses: helm/kind-action@v1.2.0
         with:
-          version: "v0.8.1"
-          image: "${{ matrix.kubernetes_version }}"
+          version: "v0.11.1"
+          node_image: "${{ matrix.kubernetes_version }}"
 
       - name: "Kubernetes version"
         run: |
