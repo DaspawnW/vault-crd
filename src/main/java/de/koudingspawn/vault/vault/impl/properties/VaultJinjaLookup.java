@@ -27,11 +27,21 @@ public class VaultJinjaLookup {
     }
 
     public String lookupV2(String path, String key) throws SecretNotAccessibleException {
-        return vaultCommunication.getVersionedSecret(path, Optional.empty()).get(key).toString();
+        HashMap versionedSecret = vaultCommunication.getVersionedSecret(path, Optional.empty());
+        if (versionedSecret.containsKey(key)) {
+            return versionedSecret.get(key).toString();
+        }
+
+        throw new SecretNotAccessibleException(String.format("Secret at path %s with key %s not available", path, key));
     }
 
     public String lookupV2(String path, int version, String key) throws SecretNotAccessibleException {
-        return vaultCommunication.getVersionedSecret(path, Optional.of(version)).get(key).toString();
+        HashMap versionedSecret = vaultCommunication.getVersionedSecret(path, Optional.of(version));
+        if (versionedSecret.containsKey(key)) {
+            return versionedSecret.get(key).toString();
+        }
+
+        throw new SecretNotAccessibleException(String.format("Secret at path %s in version %d with key %s not available", path, version, key));
     }
 
 }

@@ -9,6 +9,8 @@ import de.koudingspawn.vault.crd.VaultSpec;
 import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
+import de.koudingspawn.vault.vault.VaultService;
+import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -55,6 +57,9 @@ public class PropertiesTest {
     public EventHandler handler;
 
     @Autowired
+    public VaultService vaultService;
+
+    @Autowired
     public KubernetesClient client;
 
     @org.springframework.boot.test.context.TestConfiguration
@@ -85,7 +90,7 @@ public class PropertiesTest {
     @Test
     public void shouldRenderPropertiesFile() throws IOException {
         TestHelper.generateKVStup("kv/key", ImmutableMap.of("value", "kv1content"));
-        TestHelper.generateKV2Stup("kv2/key", ImmutableMap.of("value", "kv2content"));
+        TestHelper.generateKV2Stup("kv2/key", ImmutableMap.of("value", "kv2content", "value2", "kv3content"));
 
         Vault vault = generatePropertiesManifest();
         handler.addHandler(vault);
@@ -101,6 +106,15 @@ public class PropertiesTest {
         assertTrue(renderedProperties.contains("test=kv1content"));
         assertTrue(renderedProperties.contains("test2=kv2content"));
         assertTrue(renderedProperties.contains("test3=contextvalue"));
+    }
+
+    @Test(expected = SecretNotAccessibleException.class)
+    public void shouldFailRenderSecret() throws SecretNotAccessibleException, IOException {
+        TestHelper.generateKVStup("kv/key", ImmutableMap.of("value", "kv1content"));
+        TestHelper.generateKV2Stup("kv2/key", ImmutableMap.of("value", "kv2content"));
+
+        Vault vault = generatePropertiesManifest();
+        vaultService.generateSecret(vault);
     }
 
     @After
