@@ -28,7 +28,8 @@ public class KubernetesServiceTest {
 
     private static String COMPARE = "COMPARE";
     private static String CRDNAME = "CRDNAME";
-    
+    private static String CRDGROUP = "CRDGROUP";
+
     private static String NAMESPACE = "test";
     private static String SECRETNAME = "testsecret";
 
@@ -53,7 +54,7 @@ public class KubernetesServiceTest {
 
     @Before
     public void setUp() {
-        kubernetesService = new KubernetesService(client, CRDNAME);
+        kubernetesService = new KubernetesService(client, CRDNAME, CRDGROUP);
 
         Namespace ns = new NamespaceBuilder().withMetadata(new ObjectMetaBuilder().withName(NAMESPACE).build()).build();
         client.namespaces().createOrReplace(ns);

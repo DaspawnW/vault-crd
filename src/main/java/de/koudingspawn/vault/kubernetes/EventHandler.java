@@ -31,6 +31,9 @@ public class EventHandler {
                 log.error("Failed to generate secret for vault resource {} in namespace {} failed with exception:",
                         resource.getMetadata().getName(), resource.getMetadata().getNamespace(), e);
             }
+        } else if (kubernetesService.hasBrokenOwnerReference(resource)) {
+            log.info("Fix owner reference for secret {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
+            modifyHandler(resource);
         }
     }
 

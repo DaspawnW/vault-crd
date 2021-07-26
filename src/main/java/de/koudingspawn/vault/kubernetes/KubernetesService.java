@@ -15,10 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import static de.koudingspawn.vault.Constants.COMPARE_ANNOTATION;
 import static de.koudingspawn.vault.Constants.LAST_UPDATE_ANNOTATION;
@@ -30,17 +27,21 @@ public class KubernetesService {
 
     private final KubernetesClient client;
     private final String crdName;
+    private final String crdGroup;
 
-    public KubernetesService(KubernetesClient client, @Value("${kubernetes.crd.name}") String crdName) {
+    public KubernetesService(KubernetesClient client,
+                             @Value("${kubernetes.crd.name}") String crdName,
+                             @Value("${kubernetes.crd.group}") String crdGroup) {
         this.client = client;
         this.crdName = crdName;
+        this.crdGroup = crdGroup;
     }
 
     boolean exists(Vault resource) {
         return getSecretByVault(resource) != null;
     }
 
-    private Secret newSecretInstance(Vault resource, VaultSecret vaultSecret){
+    private Secret newSecretInstance(Vault resource, VaultSecret vaultSecret) {
         Secret secret = new Secret();
         secret.setType(vaultSecret.getType());
         secret.setMetadata(metaData(resource.getMetadata(), vaultSecret.getCompare()));
@@ -104,17 +105,34 @@ public class KubernetesService {
         boolean blockOwnerDeletion = false;
         boolean controller = true;
         OwnerReference owner = new OwnerReference(
-          crdName + "/v1",
-          blockOwnerDeletion,
-          controller,
-          "Vault",
-          resource.getName(),
-          resource.getUid()
+                crdName + "/v1",
+                blockOwnerDeletion,
+                controller,
+                "Vault",
+                resource.getName(),
+                resource.getUid()
         );
         ArrayList<OwnerReference> owners = new ArrayList<>();
         owners.add(owner);
         meta.setOwnerReferences(owners);
 
         return meta;
+    }
+
+    public boolean hasBrokenOwnerReference(Vault resource) {
+        Resource<Secret, DoneableSecret> secretDoneableSecretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
+
+        if (secretDoneableSecretResource.get() != null) {
+            Secret secret = secretDoneableSecretResource.get();
+
+            if (secret.getMetadata() != null && secret.getMetadata().getOwnerReferences() != null && secret.getMetadata().getOwnerReferences().size() == 1) {
+                OwnerReference ownerReference = secret.getMetadata().getOwnerReferences().get(0);
+                if (ownerReference.getApiVersion().equals(crdName + "/v1")) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
