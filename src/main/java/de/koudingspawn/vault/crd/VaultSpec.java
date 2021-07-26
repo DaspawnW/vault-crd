@@ -1,9 +1,11 @@
 package de.koudingspawn.vault.crd;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
 @JsonDeserialize
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VaultSpec implements KubernetesResource {
     private String path;
     private VaultType type;

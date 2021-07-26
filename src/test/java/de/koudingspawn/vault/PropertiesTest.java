@@ -92,7 +92,7 @@ public class PropertiesTest {
         TestHelper.generateKVStup("kv/key", ImmutableMap.of("value", "kv1content"));
         TestHelper.generateKV2Stup("kv2/key", ImmutableMap.of("value", "kv2content", "value2", "kv3content"));
 
-        Vault vault = generatePropertiesManifest();
+        Vault vault = generatePropertiesManifest("properties");
         handler.addHandler(vault);
 
         Secret secret = client.secrets().inNamespace("default").withName("properties").get();
@@ -113,7 +113,7 @@ public class PropertiesTest {
         TestHelper.generateKVStup("kv/key", ImmutableMap.of("value", "kv1content"));
         TestHelper.generateKV2Stup("kv2/key", ImmutableMap.of("value", "kv2content"));
 
-        Vault vault = generatePropertiesManifest();
+        Vault vault = generatePropertiesManifest("properties-1");
         vaultService.generateSecret(vault);
     }
 
@@ -126,7 +126,7 @@ public class PropertiesTest {
         }
     }
 
-    private Vault generatePropertiesManifest() throws IOException {
+    static Vault generatePropertiesManifest(String name) throws IOException {
         HashMap<String, String> properties = new HashMap<>();
         File file = new ClassPathResource("test.properties").getFile();
         String content = new String(Files.readAllBytes(file.toPath()));
@@ -145,7 +145,7 @@ public class PropertiesTest {
 
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("properties").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
+                new ObjectMetaBuilder().withName(name).withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         vault.setSpec(vaultSpec);
 

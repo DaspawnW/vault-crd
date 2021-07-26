@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static de.koudingspawn.vault.Constants.COMPARE_ANNOTATION;
 import static de.koudingspawn.vault.Constants.LAST_UPDATE_ANNOTATION;
@@ -101,11 +102,16 @@ public class KubernetesService {
         annotations.put(crdName + LAST_UPDATE_ANNOTATION, LocalDateTime.now().toString());
         annotations.put(crdName + COMPARE_ANNOTATION, compare);
         meta.setAnnotations(annotations);
+        meta.setOwnerReferences(getOwnerReference(resource));
 
+        return meta;
+    }
+
+    private List<OwnerReference> getOwnerReference(ObjectMeta resource) {
         boolean blockOwnerDeletion = false;
         boolean controller = true;
         OwnerReference owner = new OwnerReference(
-                crdName + "/v1",
+                crdGroup + "/v1",
                 blockOwnerDeletion,
                 controller,
                 "Vault",
@@ -114,9 +120,8 @@ public class KubernetesService {
         );
         ArrayList<OwnerReference> owners = new ArrayList<>();
         owners.add(owner);
-        meta.setOwnerReferences(owners);
 
-        return meta;
+        return owners;
     }
 
     public boolean hasBrokenOwnerReference(Vault resource) {
