@@ -1,3 +1,4 @@
+FROM gcr.io/distroless/java:8 AS SECURITY
 FROM openjdk:8 AS BUILD
 
 COPY . /opt
@@ -5,6 +6,8 @@ WORKDIR /opt
 RUN ./mvnw clean install -DskipTests
 
 ENV JAVA_RANDOM="file:/dev/./urandom"
+
+COPY --from=SECURITY /etc/java-8-openjdk/security/java.security /usr/local/openjdk-8/jre/lib/security/java.security
 RUN echo "networkaddress.cache.ttl=60" >> /usr/local/openjdk-8/jre/lib/security/java.security
 RUN sed -i -e "s@^securerandom.source=.*@securerandom.source=${JAVA_RANDOM}@" /usr/local/openjdk-8/jre/lib/security/java.security
 
