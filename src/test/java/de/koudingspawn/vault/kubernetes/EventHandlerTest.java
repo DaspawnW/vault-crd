@@ -5,9 +5,9 @@ import de.koudingspawn.vault.crd.VaultSpec;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.VaultService;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -24,8 +24,16 @@ public class EventHandlerTest {
     @Mock
     private KubernetesService kubernetesService;
 
-    @InjectMocks
+    @Mock
+    private ChangeAdjustmentService changeAdjustmentService;
+
     private EventHandler eventHandler;
+
+    @Before
+    public void setup() {
+        eventHandler = new EventHandler(vaultService, kubernetesService, changeAdjustmentService, true);
+    }
+
 
     @Test
     public void shouldGenerateKubernetesSecret() throws SecretNotAccessibleException {
