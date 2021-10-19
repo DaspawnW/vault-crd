@@ -2,6 +2,7 @@ package de.koudingspawn.vault.kubernetes;
 
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.crd.VaultSpec;
+import de.koudingspawn.vault.kubernetes.event.EventNotification;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.VaultService;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
@@ -27,11 +28,14 @@ public class EventHandlerTest {
     @Mock
     private ChangeAdjustmentService changeAdjustmentService;
 
+    @Mock
+    private EventNotification eventNotification;
+
     private EventHandler eventHandler;
 
     @Before
     public void setup() {
-        eventHandler = new EventHandler(vaultService, kubernetesService, changeAdjustmentService, true);
+        eventHandler = new EventHandler(vaultService, kubernetesService, changeAdjustmentService, eventNotification, true);
     }
 
 
