@@ -1,4 +1,4 @@
-apiVersion: apiextensions.k8s.io/v1
+apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: vault.koudingspawn.de
@@ -15,80 +15,69 @@ spec:
     - name: v1
       served: true
       storage: true
-      schema:
-        openAPIV3Schema:
-          type: object
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
           properties:
-            spec:
+            path:
+              type: string
+              pattern: '^.*?\/.*?(\/.*?)?$'
+            type:
+              type: string
+              enum:
+                - PKI
+                - PKIJKS
+                - CERT
+                - CERTJKS
+                - DOCKERCFG
+                - KEYVALUE
+                - KEYVALUEV2
+                - PROPERTIES
+            pkiConfiguration:
               type: object
               properties:
-                path:
+                commonName:
                   type: string
-                  pattern: '^.*?\/.*?(\/.*?)?$'
+                altNames:
+                  type: string
+                ipSans:
+                  type: string
+                ttl:
+                  type: string
+                  pattern: '^[0-9]{1,}[hm]$'
+            jksConfiguration:
+              type: object
+              properties:
+                password:
+                  type: string
+                alias:
+                  type: string
+                keyName:
+                  type: string
+                caAlias:
+                  type: string
+            versionConfiguration:
+              type: object
+              properties:
+                version:
+                  type: integer
+            propertiesConfiguration:
+              type: object
+              properties:
+                context:
+                  type: object
+                files:
+                  type: object
+            dockerCfgConfiguration:
+              type: object
+              properties:
                 type:
                   type: string
                   enum:
-                    - PKI
-                    - PKIJKS
-                    - CERT
-                    - CERTJKS
-                    - DOCKERCFG
                     - KEYVALUE
                     - KEYVALUEV2
-                    - PROPERTIES
-                pkiConfiguration:
-                  type: object
-                  properties:
-                    commonName:
-                      type: string
-                    altNames:
-                      type: string
-                    ipSans:
-                      type: string
-                    ttl:
-                      type: string
-                      pattern: '^[0-9]{1,}[hm]$'
-                jksConfiguration:
-                  type: object
-                  properties:
-                    password:
-                      type: string
-                    alias:
-                      type: string
-                    keyName:
-                      type: string
-                    caAlias:
-                      type: string
-                versionConfiguration:
-                  type: object
-                  properties:
-                    version:
-                      type: integer
-                propertiesConfiguration:
-                  type: object
-                  properties:
-                    context:
-                      type: object
-                      x-kubernetes-preserve-unknown-fields: true
-                    files:
-                      type: object
-                      x-kubernetes-preserve-unknown-fields: true
-                dockerCfgConfiguration:
-                  type: object
-                  properties:
-                    type:
-                      type: string
-                      enum:
-                        - KEYVALUE
-                        - KEYVALUEV2
-                    version:
-                      type: integer
-                changeAdjustmentCallback:
-                  type: object
-                  properties:
-                    type:
-                      type: string
-                    name:
-                      type: string
-              required:
-                - type
+                version:
+                  type: integer
+          required:
+            - type
