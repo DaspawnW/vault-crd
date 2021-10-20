@@ -26,14 +26,14 @@ public class KubernetesConnection {
     private static final Logger log = LoggerFactory.getLogger(KubernetesConnection.class);
 
     @Bean
-    @Profile("development & !test")
+    @Profile("development")
     public KubernetesClient testClient() {
         Config config = new ConfigBuilder().withMasterUrl("http://localhost:8080").withWatchReconnectLimit(5).build();
         return new DefaultKubernetesClient(config);
     }
 
     @Bean
-    @Profile("!development & !test")
+    @Profile("!development")
     public KubernetesClient client() {
         return new DefaultKubernetesClient();
     }
