@@ -88,12 +88,6 @@ public class TestHelper {
     public static void createCrd(KubernetesClient kubernetesClient) {
         CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
         kubernetesClient.customResourceDefinitions().createOrReplace(pgDBMS);
-        try {
-            // It's required as Kubernetes isn't fast enough to have vault-crd in place
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            //
-        }
     }
 
     public static void deleteCRD(KubernetesClient kubernetesClient) {
