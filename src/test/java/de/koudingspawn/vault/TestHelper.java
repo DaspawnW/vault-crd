@@ -86,12 +86,12 @@ public class TestHelper {
 
 
     public static void createCrd(KubernetesClient kubernetesClient) {
-        CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
-        kubernetesClient.customResourceDefinitions().create(pgDBMS);
+//        CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
+//        kubernetesClient.customResourceDefinitions().create(pgDBMS);
     }
 
     public static void deleteCRD(KubernetesClient kubernetesClient) {
-        CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
-        kubernetesClient.customResourceDefinitions().delete(pgDBMS);
+//        CustomResourceDefinition pgDBMS = kubernetesClient.customResourceDefinitions().load(TestHelper.class.getResourceAsStream("/vault-crd.yaml")).get();
+//        kubernetesClient.customResourceDefinitions().delete(pgDBMS);
     }
 }
