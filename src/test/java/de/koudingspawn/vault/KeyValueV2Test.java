@@ -10,14 +10,11 @@ import de.koudingspawn.vault.kubernetes.scheduler.impl.KeyValueV2Refresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -54,20 +51,6 @@ public class KeyValueV2Test {
 
     @Autowired
     public KubernetesClient client;
-
-    @org.springframework.boot.test.context.TestConfiguration
-    static class KindConfig {
-
-        @Bean
-        @Primary
-        public KubernetesClient client() {
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-            TestHelper.createCrd(kubernetesClient);
-
-            return kubernetesClient;
-        }
-
-    }
 
     @Before
     public void before() {
@@ -290,9 +273,4 @@ public class KeyValueV2Test {
         }
     }
 
-    @AfterClass
-    public static void cleanupK8S() {
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-        TestHelper.deleteCRD(kubernetesClient);
-    }
 }

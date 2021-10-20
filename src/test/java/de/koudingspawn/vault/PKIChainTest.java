@@ -11,14 +11,11 @@ import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.impl.pki.VaultResponseData;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.text.ParseException;
@@ -55,20 +52,6 @@ public class PKIChainTest {
 
     @Autowired
     public KubernetesClient client;
-
-    @org.springframework.boot.test.context.TestConfiguration
-    static class KindConfig {
-
-        @Bean
-        @Primary
-        public KubernetesClient client() {
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-            TestHelper.createCrd(kubernetesClient);
-
-            return kubernetesClient;
-        }
-
-    }
 
     @Autowired
     CertRefresh certRefresh;
@@ -277,12 +260,6 @@ public class PKIChainTest {
         TimeZone tz = TimeZone.getTimeZone("UTC");
         format.setTimeZone(tz);
         return convertDate(format.parse(date));
-    }
-
-    @AfterClass
-    public static void cleanupK8S() {
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }
