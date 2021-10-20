@@ -3,8 +3,8 @@ name: Java CI
 on: [push]
 
 jobs:
-  kubernetes:
-    name: "Kubernetes"
+  test:
+    name: "Test"
 
     runs-on: ubuntu-latest
 
@@ -42,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
 
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    needs: test
 
     steps:
       - uses: actions/checkout@v1
