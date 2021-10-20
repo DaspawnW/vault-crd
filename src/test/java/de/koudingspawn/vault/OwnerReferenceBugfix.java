@@ -15,7 +15,10 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,10 +67,7 @@ public class OwnerReferenceBugfix {
         @Bean
         @Primary
         public KubernetesClient client() {
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-            TestHelper.createCrd(kubernetesClient);
-
-            return kubernetesClient;
+            return new DefaultKubernetesClient();
         }
 
     }
@@ -123,12 +123,6 @@ public class OwnerReferenceBugfix {
         assertNotNull(foundSecret);
         assertEquals(1, foundSecret.getMetadata().getOwnerReferences().size());
         assertEquals("something-not-garbage-collected.de/v1", foundSecret.getMetadata().getOwnerReferences().get(0).getApiVersion());
-    }
-
-    @AfterClass
-    public static void cleanupK8S() {
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }
