@@ -68,10 +68,7 @@ public class PKITest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-            TestHelper.createCrd(kubernetesClient);
-
-            return kubernetesClient;
+            return new DefaultKubernetesClient();
         }
 
     }
@@ -213,12 +210,6 @@ public class PKITest {
         TimeZone tz = TimeZone.getTimeZone("UTC");
         format.setTimeZone(tz);
         return convertDate(format.parse(date));
-    }
-
-    @AfterClass
-    public static void cleanupK8S() {
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }

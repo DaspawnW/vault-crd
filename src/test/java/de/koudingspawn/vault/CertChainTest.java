@@ -58,10 +58,7 @@ public class CertChainTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-            TestHelper.createCrd(kubernetesClient);
-
-            return kubernetesClient;
+            return new DefaultKubernetesClient();
         }
 
     }
@@ -239,12 +236,6 @@ public class CertChainTest {
         if (secret != null) {
             client.secrets().inNamespace("default").withName("certificate").cascading(true).delete();
         }
-    }
-
-    @AfterClass
-    public static void cleanupK8S() {
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }

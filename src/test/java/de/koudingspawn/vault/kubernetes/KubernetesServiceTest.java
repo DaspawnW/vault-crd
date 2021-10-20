@@ -1,13 +1,11 @@
 package de.koudingspawn.vault.kubernetes;
 
-import de.koudingspawn.vault.TestHelper;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,10 +42,7 @@ public class KubernetesServiceTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-            TestHelper.createCrd(kubernetesClient);
-
-            return kubernetesClient;
+            return new DefaultKubernetesClient();
         }
 
     }
@@ -164,12 +159,6 @@ public class KubernetesServiceTest {
         vault.setMetadata(meta);
 
         return vault;
-    }
-
-    @AfterClass
-    public static void cleanupK8S() {
-        KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-        TestHelper.deleteCRD(kubernetesClient);
     }
 
 }
