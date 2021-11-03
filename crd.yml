@@ -23,7 +23,7 @@ spec:
               type: object
               properties:
                 path:
-                  type: string
+                  type: array
                   pattern: '^.*?\/.*?(\/.*?)?$'
                 type:
                   type: string

@@ -23,15 +23,26 @@ public class KeyValueV2Generator implements TypedSecretGenerator {
     @Override
     public VaultSecret generateSecret(Vault resource) throws SecretNotAccessibleException {
         Optional<Integer> version = getVersion(resource.getSpec());
-        HashMap versionedKVResponse =
-                vaultCommunication.getVersionedSecret(resource.getSpec().getPath(), version);
-        return mapKeyValueResponse(versionedKVResponse);
+
+        List<VaultSecret> versionedKVResponse = new ArrayList<>();
+
+        for (String path : resource.getSpec().getPath() ){
+            versionedKVResponse.add(
+                    mapKeyValueResponse(vaultCommunication.getVersionedSecret(path, version)));
+        }
+
+        //HashMap versionedKVResponse =
+        //        vaultCommunication.getVersionedSecret(resource.getSpec().getPath(), version);
+
+        //Se devuelve solo el primero para poder compilar, es necesario revisar si este es el flujo correcto.
+        return versionedKVResponse.get(0);
     }
 
     @Override
     public String getHash(VaultSpec resource) throws SecretNotAccessibleException {
         Optional<Integer> version = getVersion(resource);
-        HashMap keyValue = vaultCommunication.getVersionedSecret(resource.getPath(), version);
+        //Se usa solo el primero para poder compilar, es necesario revisar si este es el flujo correcto.
+        HashMap keyValue = vaultCommunication.getVersionedSecret(resource.getPath().get(0), version);
         if (keyValue != null) {
             return mapKeyValueResponse(keyValue).getCompare();
         }

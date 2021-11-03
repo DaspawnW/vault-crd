@@ -1,0 +1,10 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: test-keyvalue
+spec:
+  paths:
+  - "keyvaluev1/docker-hub"
+  - "keyvaluev1/docker-hub2"
+  - "keyvaluev1/docker-hub3"
+  type: "KEYVALUE"

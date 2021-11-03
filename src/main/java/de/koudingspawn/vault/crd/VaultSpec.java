@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
+import java.util.List;
+
 @JsonDeserialize
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VaultSpec implements KubernetesResource {
-    private String path;
+    //private String path;
+    private List<String> path;
     private VaultType type;
     private VaultPkiConfiguration pkiConfiguration;
     private VaultJKSConfiguration jksConfiguration;
@@ -16,11 +19,19 @@ public class VaultSpec implements KubernetesResource {
     private VaultDockerCfgConfiguration dockerCfgConfiguration;
     private VaultChangeAdjustmentCallback changeAdjustmentCallback;
 
-    public String getPath() {
+    //public String getPath() {
+    //    return path;
+    //}
+
+    public List<String> getPath() {
         return path;
     }
 
-    public void setPath(String path) {
+    //public void setPath(String path) {
+    //    this.path = path;
+    //}
+
+    public void setPath(List<String> path) {
         this.path = path;
     }
 
