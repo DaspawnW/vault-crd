@@ -31,6 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,6 +58,10 @@ import static org.junit.Assert.assertNotNull;
         }
 )
 public class PKITest {
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     @ClassRule
     public static WireMockClassRule wireMockClassRule =
