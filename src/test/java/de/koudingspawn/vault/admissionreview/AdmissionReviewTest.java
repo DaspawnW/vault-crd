@@ -1,6 +1,5 @@
 package de.koudingspawn.vault.admissionreview;
 
-import de.koudingspawn.vault.crd.DoneableVault;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.crd.VaultList;
 import de.koudingspawn.vault.vault.VaultSecret;
@@ -46,7 +45,7 @@ public class AdmissionReviewTest {
     VaultService vaultService;
 
     @MockBean
-    MixedOperation<Vault, VaultList, DoneableVault, Resource<Vault, DoneableVault>> customResource;
+    public MixedOperation<Vault, VaultList, Resource<Vault>> customResource;
 
     @Autowired
     private MockMvc mvc;

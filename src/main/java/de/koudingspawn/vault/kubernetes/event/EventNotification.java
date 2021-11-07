@@ -1,8 +1,8 @@
 package de.koudingspawn.vault.kubernetes.event;
 
 import de.koudingspawn.vault.crd.Vault;
-import io.fabric8.kubernetes.api.model.Event;
-import io.fabric8.kubernetes.api.model.EventBuilder;
+import io.fabric8.kubernetes.api.model.events.v1beta1.Event;
+import io.fabric8.kubernetes.api.model.events.v1beta1.EventBuilder;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -30,6 +30,7 @@ public class EventNotification {
     }
 
     public void storeNewEvent(EventType type, String message, Vault resource) {
+        // @deprecated in 1.25 event v1beta1 will be deprecated
         ObjectReference ref = new ObjectReferenceBuilder()
                 .withName(resource.getMetadata().getName())
                 .withNamespace(resource.getMetadata().getNamespace())
@@ -48,17 +49,17 @@ public class EventNotification {
                 .withGenerateName(resource.getMetadata().getName())
                 .withNamespace(resource.getMetadata().getNamespace())
                 .endMetadata()
-                .withInvolvedObject(ref)
-                .withLastTimestamp(nowAsISO)
-                .withFirstTimestamp(nowAsISO)
-                .withReportingComponent("vault-crd")
+                .withRegarding(ref)
+                .withDeprecatedLastTimestamp(nowAsISO)
+                .withDeprecatedFirstTimestamp(nowAsISO)
+                .withReportingController("vault-crd")
                 .withType(type.getEventType())
                 .withReason(type.getReason())
-                .withMessage(message)
+                .withNote(message)
                 .build();
 
         try {
-            client.events().inNamespace(resource.getMetadata().getNamespace()).create(evt);
+            client.events().v1beta1().events().inNamespace(resource.getMetadata().getNamespace()).create(evt);
         } catch (Exception ex) {
             log.error("Failed to store event for {} in namespace {} next to resource with error",
                     resource.getMetadata().getName(), resource.getMetadata().getNamespace(), ex);
