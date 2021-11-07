@@ -45,7 +45,6 @@ public class EventNotificationTest {
         }
     }
 
-    // Test to get warned as soon as event v1beta1 isn't there anymore
     @Test
     public void shouldBeAbleToCreateEvent() {
         String uuid = UUID.randomUUID().toString();
@@ -59,7 +58,7 @@ public class EventNotificationTest {
 
         evtNotification.storeNewEvent(EventType.CREATION_SUCCESSFUL, "Successfully created secret", vault);
 
-        assertEquals(1, client.events().v1beta1().events().inNamespace("default").list().getItems()
+        assertEquals(1, client.events().v1().events().inNamespace("default").list().getItems()
                 .stream().filter(event -> event.getRegarding().getName().equals("test") && event.getRegarding().getUid().equals(uuid)).count());
     }
 
