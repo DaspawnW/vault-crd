@@ -8,6 +8,7 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.KeyValueV2Refresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -283,7 +284,7 @@ public class KeyValueV2Test {
     public void cleanupAfterJob() {
         Secret secret = client.secrets().inNamespace("default").withName("simple").get();
         if (secret != null) {
-            client.secrets().inNamespace("default").withName("simple").cascading(true).delete();
+            client.secrets().inNamespace("default").withName("simple").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         }
     }
 

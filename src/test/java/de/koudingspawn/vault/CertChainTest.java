@@ -8,6 +8,7 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -234,7 +235,7 @@ public class CertChainTest {
     public void cleanup() {
         Secret secret = client.secrets().inNamespace("default").withName("certificate").get();
         if (secret != null) {
-            client.secrets().inNamespace("default").withName("certificate").cascading(true).delete();
+            client.secrets().inNamespace("default").withName("certificate").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         }
     }
 

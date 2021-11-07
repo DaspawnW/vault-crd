@@ -9,10 +9,17 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.impl.pki.VaultResponseData;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +27,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit4.SpringRunner;
-import sun.security.tools.keytool.CertAndKeyGen;
-import sun.security.x509.X500Name;
 
-import java.security.cert.X509Certificate;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.cert.Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -145,20 +154,31 @@ public class PKITest {
     public void cleanup() {
         Secret secret = client.secrets().inNamespace("default").withName("pki").get();
         if (secret != null) {
-            client.secrets().inNamespace("default").withName("pki").cascading(true).delete();
+            client.secrets().inNamespace("default").withName("pki").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         }
     }
 
     private VaultResponseData generateKeyPair(Date startDate, long valid) throws Exception {
-        CertAndKeyGen certGen = new CertAndKeyGen("RSA", "SHA256WithRSA");
-        certGen.generate(2048);
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
+        keyPairGenerator.initialize(2048);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
         X500Name x500Name = new X500Name("CN=Test");
-        X509Certificate cert = certGen.getSelfCertificate(x500Name, startDate, valid);
+        BigInteger certSerialNumber = BigInteger.valueOf(System.currentTimeMillis());
+        String signatureAlgorithm = "SHA256WithRSA";
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm)
+                .build(keyPair.getPrivate());
+        Instant endDate = startDate.toInstant().plus(valid, ChronoUnit.SECONDS);
 
+        JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                x500Name, certSerialNumber, startDate, Date.from(endDate), x500Name,
+                keyPair.getPublic());
 
-        byte[] encodedPrivateKey = certGen.getPrivateKey().getEncoded();
-        byte[] encodedPublicKey = cert.getEncoded();
+        Certificate certificate = new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME)
+                .getCertificate(certBuilder.build(contentSigner));
+
+        byte[] encodedPrivateKey = keyPair.getPrivate().getEncoded();
+        byte[] encodedPublicKey = certificate.getEncoded();
 
         String privateKeySb = "-----BEGIN PRIVATE KEY-----\n" +
                 Base64.getMimeEncoder().encodeToString(encodedPrivateKey) +

@@ -11,6 +11,7 @@ import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.VaultService;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -119,7 +120,7 @@ public class PropertiesTest {
     public void cleanup() {
         Secret secret = client.secrets().inNamespace("default").withName("properties").get();
         if (secret != null) {
-            client.secrets().inNamespace("default").withName("properties").cascading(true).delete();
+            client.secrets().inNamespace("default").withName("properties").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         }
     }
 
