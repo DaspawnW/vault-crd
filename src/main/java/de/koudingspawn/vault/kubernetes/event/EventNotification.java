@@ -1,10 +1,10 @@
 package de.koudingspawn.vault.kubernetes.event;
 
 import de.koudingspawn.vault.crd.Vault;
-import io.fabric8.kubernetes.api.model.events.v1beta1.Event;
-import io.fabric8.kubernetes.api.model.events.v1beta1.EventBuilder;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
+import io.fabric8.kubernetes.api.model.events.v1.Event;
+import io.fabric8.kubernetes.api.model.events.v1.EventBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class EventNotification {
                 .build();
 
         try {
-            client.events().v1beta1().events().inNamespace(resource.getMetadata().getNamespace()).create(evt);
+            client.events().v1().events().inNamespace(resource.getMetadata().getNamespace()).create(evt);
         } catch (Exception ex) {
             log.error("Failed to store event for {} in namespace {} next to resource with error",
                     resource.getMetadata().getName(), resource.getMetadata().getNamespace(), ex);
