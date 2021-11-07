@@ -31,7 +31,7 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>6.1.1.Final</version>
 		</dependency>
@@ -78,6 +78,12 @@
 			<version>1.58</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -92,6 +98,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
+                    <release>11</release>
 					<fork>true</fork>
 					<compilerArgument>-XDignore.symbol.file</compilerArgument>
 				</configuration>
