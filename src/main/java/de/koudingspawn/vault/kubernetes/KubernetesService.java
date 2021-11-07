@@ -2,7 +2,7 @@ package de.koudingspawn.vault.kubernetes;
 
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.vault.VaultSecret;
-import io.fabric8.kubernetes.api.model.DoneableSecret;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -58,16 +58,16 @@ public class KubernetesService {
     }
 
     void deleteSecret(ObjectMeta resourceMetadata) {
-        client.secrets().inNamespace(resourceMetadata.getNamespace()).withName(resourceMetadata.getName()).cascading(true).delete();
+        client.secrets().inNamespace(resourceMetadata.getNamespace()).withName(resourceMetadata.getName()).withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         log.info("Deleted secret {} in namespace {}", resourceMetadata.getName(), resourceMetadata.getNamespace());
     }
 
     void modifySecret(Vault resource, VaultSecret vaultSecret) {
-        Resource<Secret, DoneableSecret> secretDoneableSecretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
+        Resource<Secret> secretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
         Secret secret;
 
-        if (secretDoneableSecretResource.get() != null) {
-            secret = secretDoneableSecretResource.get();
+        if (secretResource.get() != null) {
+            secret = secretResource.get();
         } else {
             secret = newSecretInstance(resource, vaultSecret);
         }
@@ -76,15 +76,15 @@ public class KubernetesService {
         secret.setMetadata(metaData(resource.getMetadata(), vaultSecret.getCompare()));
         secret.setData(vaultSecret.getData());
 
-        secretDoneableSecretResource.createOrReplace(secret);
+        secretResource.createOrReplace(secret);
         log.info("Modified secret {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
     }
 
     public Secret getSecretByVault(Vault resource) {
-        Resource<Secret, DoneableSecret> secretDoneableSecretResource =
+        Resource<Secret> secretResource =
                 client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
 
-        return secretDoneableSecretResource.get();
+        return secretResource.get();
     }
 
     private ObjectMeta metaData(ObjectMeta resource, String compare) {
@@ -125,10 +125,10 @@ public class KubernetesService {
     }
 
     public boolean hasBrokenOwnerReference(Vault resource) {
-        Resource<Secret, DoneableSecret> secretDoneableSecretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
+        Resource<Secret> secretResource = client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
 
-        if (secretDoneableSecretResource.get() != null) {
-            Secret secret = secretDoneableSecretResource.get();
+        if (secretResource.get() != null) {
+            Secret secret = secretResource.get();
 
             if (secret.getMetadata() != null && secret.getMetadata().getOwnerReferences() != null && secret.getMetadata().getOwnerReferences().size() == 1) {
                 OwnerReference ownerReference = secret.getMetadata().getOwnerReferences().get(0);

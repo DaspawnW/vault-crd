@@ -1,6 +1,5 @@
 package de.koudingspawn.vault.kubernetes.scheduler;
 
-import de.koudingspawn.vault.crd.DoneableVault;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.crd.VaultList;
 import de.koudingspawn.vault.kubernetes.EventHandler;
@@ -25,12 +24,12 @@ public class ScheduledRefresh {
     private final TypeRefreshFactory typeRefreshFactory;
     private final EventHandler eventHandler;
     private final EventNotification eventNotification;
-    private final MixedOperation<Vault, VaultList, DoneableVault, Resource<Vault, DoneableVault>> customResource;
+    private final MixedOperation<Vault, VaultList, Resource<Vault>> customResource;
 
     public ScheduledRefresh(
             EventHandler eventHandler,
             TypeRefreshFactory typeRefreshFactory,
-            EventNotification eventNotification, MixedOperation<Vault, VaultList, DoneableVault, Resource<Vault, DoneableVault>> customResource) {
+            EventNotification eventNotification, MixedOperation<Vault, VaultList, Resource<Vault>> customResource) {
         this.typeRefreshFactory = typeRefreshFactory;
         this.eventHandler = eventHandler;
         this.eventNotification = eventNotification;

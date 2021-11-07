@@ -2,6 +2,8 @@ package de.koudingspawn.vault.kubernetes;
 
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.crd.VaultChangeAdjustmentCallback;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
+import io.fabric8.kubernetes.api.model.apps.StatefulSetBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,15 +46,15 @@ public class ChangeAdjustmentService {
                     .deployments()
                     .inNamespace(namespace)
                     .withName(name)
-                    .edit()
-                    .editSpec()
-                    .editTemplate()
-                    .editMetadata()
-                    .addToAnnotations("certificate-change-on", "vault-crd_" + System.currentTimeMillis())
-                    .endMetadata()
-                    .endTemplate()
-                    .endSpec()
-                    .done();
+                    .edit(d -> new DeploymentBuilder(d)
+                            .editSpec()
+                            .editTemplate()
+                            .editMetadata()
+                            .addToAnnotations("certificate-change-on", "vault-crd_" + System.currentTimeMillis())
+                            .endMetadata()
+                            .endTemplate()
+                            .endSpec()
+                            .build());
         } catch (Exception ex) {
             log.error("Failed to rotate deployment {} in namespace {} with exception:", name, namespace, ex);
         }
@@ -65,15 +67,15 @@ public class ChangeAdjustmentService {
                     .statefulSets()
                     .inNamespace(namespace)
                     .withName(name)
-                    .edit()
-                    .editSpec()
-                    .editTemplate()
-                    .editMetadata()
-                    .addToAnnotations("certificate-change-on", "vault-crd_" + System.currentTimeMillis())
-                    .endMetadata()
-                    .endTemplate()
-                    .endSpec()
-                    .done();
+                    .edit(statefulSet -> new StatefulSetBuilder(statefulSet)
+                            .editSpec()
+                            .editTemplate()
+                            .editMetadata()
+                            .addToAnnotations("certificate-change-on", "vault-crd_" + System.currentTimeMillis())
+                            .endMetadata()
+                            .endTemplate()
+                            .endSpec()
+                            .build());
         } catch (Exception ex) {
             log.error("Failed to rotate statefulSet {} in namespace {} with exception:", name, namespace, ex);
         }

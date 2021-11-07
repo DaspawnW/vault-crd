@@ -3,7 +3,6 @@ package de.koudingspawn.vault;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableMap;
-import de.koudingspawn.vault.crd.DoneableVault;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.crd.VaultList;
 import de.koudingspawn.vault.kubernetes.EventHandler;
@@ -59,7 +58,7 @@ public class OwnerReferenceBugfix {
     public KubernetesClient client;
 
     @Autowired
-    public MixedOperation<Vault, VaultList, DoneableVault, Resource<Vault, DoneableVault>> customResource;
+    public MixedOperation<Vault, VaultList, Resource<Vault>> customResource;
 
     @org.springframework.boot.test.context.TestConfiguration
     static class KindConfig {
