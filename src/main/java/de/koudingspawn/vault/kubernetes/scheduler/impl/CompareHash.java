@@ -16,7 +16,7 @@ abstract public class CompareHash {
         if (secretByVault.getMetadata().getAnnotations() != null) {
             String kubernetesSha256 = secretByVault.getMetadata().getAnnotations().get(crdName + COMPARE_ANNOTATION);
 
-            if (StringUtils.isEmpty(kubernetesSha256)) {
+            if (!StringUtils.hasText(kubernetesSha256)) {
                 // has no sha256 then calculate it
                 return true;
             }

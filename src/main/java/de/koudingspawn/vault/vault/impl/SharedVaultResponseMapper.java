@@ -9,22 +9,16 @@ import de.koudingspawn.vault.vault.impl.pki.VaultResponseData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import sun.security.util.DerInputStream;
-import sun.security.util.DerValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.RSAPrivateCrtKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.HashMap;
@@ -96,14 +90,14 @@ public class SharedVaultResponseMapper {
 
             keyStore.setKeyEntry(
                     getAlias(jksConfiguration),
-                    getPrivateKey(data.getPrivate_key()),
+                    EncryptionUtils.loadPrivateKey(data.getPrivate_key()),
                     getPassword(jksConfiguration).toCharArray(),
                     publicKeyList);
 
-            if (jksConfiguration != null && !StringUtils.isEmpty(jksConfiguration.getCaAlias())) {
+            if (jksConfiguration != null && StringUtils.hasText(jksConfiguration.getCaAlias())) {
                 keyStore.setCertificateEntry(
-                    jksConfiguration.getCaAlias(),
-                    getPublicKey(data.getIssuing_ca())[0]
+                        jksConfiguration.getCaAlias(),
+                        getPublicKey(data.getIssuing_ca())[0]
                 );
             }
 
@@ -139,21 +133,21 @@ public class SharedVaultResponseMapper {
     }
 
     private String getAlias(VaultJKSConfiguration jksConfiguration) {
-        if (jksConfiguration == null || StringUtils.isEmpty(jksConfiguration.getAlias())) {
+        if (jksConfiguration == null || !StringUtils.hasText(jksConfiguration.getAlias())) {
             return defaultAlias;
         }
         return jksConfiguration.getAlias();
     }
 
     private String getPassword(VaultJKSConfiguration jksConfiguration) {
-        if (jksConfiguration == null || StringUtils.isEmpty(jksConfiguration.getPassword())) {
+        if (jksConfiguration == null || !StringUtils.hasText(jksConfiguration.getPassword())) {
             return defaultPassword;
         }
         return jksConfiguration.getPassword();
     }
 
     private String getKey(VaultJKSConfiguration jksConfiguration) {
-        if (jksConfiguration == null || StringUtils.isEmpty(jksConfiguration.getKeyName())) {
+        if (jksConfiguration == null || !StringUtils.hasText(jksConfiguration.getKeyName())) {
             return defaultKeyName;
         }
         return jksConfiguration.getKeyName();
@@ -178,33 +172,6 @@ public class SharedVaultResponseMapper {
 
             return shortestLiveTime;
         }
-    }
-
-    private PrivateKey getPrivateKey(String pem) throws GeneralSecurityException, IOException {
-        String pemContent = pem.replaceAll("\\n", "").replace("-----BEGIN RSA PRIVATE KEY-----", "").replace("-----END RSA PRIVATE KEY-----", "");
-        DerInputStream derReader = new DerInputStream(Base64.getDecoder().decode(pemContent));
-
-        DerValue[] seq = derReader.getSequence(0);
-
-        if (seq.length < 9) {
-            throw new GeneralSecurityException("Could not parse a PKCS1 private key.");
-        }
-
-        // skip version seq[0];
-        BigInteger modulus = seq[1].getBigInteger();
-        BigInteger publicExp = seq[2].getBigInteger();
-        BigInteger privateExp = seq[3].getBigInteger();
-        BigInteger prime1 = seq[4].getBigInteger();
-        BigInteger prime2 = seq[5].getBigInteger();
-        BigInteger exp1 = seq[6].getBigInteger();
-        BigInteger exp2 = seq[7].getBigInteger();
-        BigInteger crtCoef = seq[8].getBigInteger();
-
-        RSAPrivateCrtKeySpec keySpec = new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2, exp1, exp2, crtCoef);
-
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-
-        return factory.generatePrivate(keySpec);
     }
 
 }

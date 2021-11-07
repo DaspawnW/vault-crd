@@ -9,6 +9,7 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.impl.pki.VaultResponseData;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -140,7 +141,7 @@ public class PKIChainTest {
     public void cleanup() {
         Secret secret = client.secrets().inNamespace("default").withName("pki").get();
         if (secret != null) {
-            client.secrets().inNamespace("default").withName("pki").cascading(true).delete();
+            client.secrets().inNamespace("default").withName("pki").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         }
     }
 

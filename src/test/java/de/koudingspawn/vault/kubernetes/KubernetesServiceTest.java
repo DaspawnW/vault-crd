@@ -128,7 +128,7 @@ public class KubernetesServiceTest {
     public void cleanup() {
         Secret secret = client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get();
         if (secret != null) {
-            client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).cascading(true).delete();
+            client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
         }
     }
 

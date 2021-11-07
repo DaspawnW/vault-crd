@@ -4,10 +4,10 @@ import de.koudingspawn.vault.crd.VaultDockerCfgConfiguration;
 import de.koudingspawn.vault.crd.VaultPkiConfiguration;
 import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
+import de.koudingspawn.vault.vault.communication.TokenLookup;
 import de.koudingspawn.vault.vault.impl.dockercfg.PullSecret;
 import de.koudingspawn.vault.vault.impl.pki.PKIRequest;
 import de.koudingspawn.vault.vault.impl.pki.PKIResponse;
-import jdk.nashorn.internal.parser.TokenLookup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -90,16 +90,16 @@ public class VaultCommunication {
         PKIRequest pkiRequest = new PKIRequest();
 
         if (configuration != null) {
-            if (!StringUtils.isEmpty(configuration.getCommonName())) {
+            if (StringUtils.hasText(configuration.getCommonName())) {
                 pkiRequest.setCommon_name(configuration.getCommonName());
             }
-            if (!StringUtils.isEmpty(configuration.getAltNames())) {
+            if (StringUtils.hasText(configuration.getAltNames())) {
                 pkiRequest.setAlt_names(configuration.getAltNames());
             }
-            if (!StringUtils.isEmpty(configuration.getIpSans())) {
+            if (StringUtils.hasText(configuration.getIpSans())) {
                 pkiRequest.setIp_sans(configuration.getIpSans());
             }
-            if (!StringUtils.isEmpty(configuration.getTtl())) {
+            if (StringUtils.hasText(configuration.getTtl())) {
                 pkiRequest.setTtl(configuration.getTtl());
             }
         }
@@ -111,7 +111,7 @@ public class VaultCommunication {
         return getVersionedSecret(path, version, HashMap.class);
     }
 
-    private <T> T getVersionedSecret(String path, Optional<Integer> version, Class<T> clazz) throws SecretNotAccessibleException{
+    private <T> T getVersionedSecret(String path, Optional<Integer> version, Class<T> clazz) throws SecretNotAccessibleException {
         String mountPoint = extractMountPoint(path);
         String extractedKey = extractKey(path);
 
