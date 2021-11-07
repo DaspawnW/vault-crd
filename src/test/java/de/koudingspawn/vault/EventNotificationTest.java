@@ -59,7 +59,7 @@ public class EventNotificationTest {
         evtNotification.storeNewEvent(EventType.CREATION_SUCCESSFUL, "Successfully created secret", vault);
 
         assertEquals(1, client.v1().events().inNamespace("default").list().getItems()
-                .stream().filter(event -> event.getRelated().getName().equals("test") && event.getRelated().getUid().equals(uuid)).count());
+                .stream().filter(event -> event.getInvolvedObject().getName().equals("test") && event.getInvolvedObject().getUid().equals(uuid)).count());
     }
 
 }
