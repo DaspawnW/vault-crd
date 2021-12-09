@@ -33,8 +33,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(
         properties = {
-                "kubernetes.vault.url=http://localhost:8201/v1/",
-                "kubernetes.initial-delay=5000000"
+                "kubernetes.vault.url=http://localhost:8201/v1/"
         }
 
 )

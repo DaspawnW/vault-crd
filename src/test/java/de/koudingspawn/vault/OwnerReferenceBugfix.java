@@ -37,7 +37,6 @@ import static org.junit.Assert.assertNotNull;
 @SpringBootTest(
         properties = {
                 "kubernetes.vault.url=http://localhost:8210/v1/",
-                "kubernetes.initial-delay=5000000",
                 "kubernetes.vault.token=c73ab0cb-41e6-b89c-7af6-96b36f1ac87b"
         }
 

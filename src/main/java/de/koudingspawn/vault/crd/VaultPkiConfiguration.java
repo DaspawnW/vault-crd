@@ -1,5 +1,7 @@
 package de.koudingspawn.vault.crd;
 
+import java.util.Objects;
+
 public class VaultPkiConfiguration {
 
     private String commonName;
@@ -37,5 +39,18 @@ public class VaultPkiConfiguration {
 
     public void setTtl(String ttl) {
         this.ttl = ttl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VaultPkiConfiguration that = (VaultPkiConfiguration) o;
+        return Objects.equals(commonName, that.commonName) && Objects.equals(altNames, that.altNames) && Objects.equals(ipSans, that.ipSans) && Objects.equals(ttl, that.ttl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commonName, altNames, ipSans, ttl);
     }
 }

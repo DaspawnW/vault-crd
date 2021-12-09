@@ -38,8 +38,7 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(SpringRunner.class)
 @SpringBootTest(
         properties = {
-                "kubernetes.vault.url=http://localhost:8205/v1/",
-                "kubernetes.initial-delay=5000000"
+                "kubernetes.vault.url=http://localhost:8205/v1/"
         }
 )
 public class PKIChainTest {
