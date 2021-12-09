@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
+import java.util.Objects;
+
 @JsonDeserialize
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VaultSpec implements KubernetesResource {
@@ -78,5 +80,18 @@ public class VaultSpec implements KubernetesResource {
 
     public void setChangeAdjustmentCallback(VaultChangeAdjustmentCallback changeAdjustmentCallback) {
         this.changeAdjustmentCallback = changeAdjustmentCallback;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VaultSpec vaultSpec = (VaultSpec) o;
+        return Objects.equals(path, vaultSpec.path) && type == vaultSpec.type && Objects.equals(pkiConfiguration, vaultSpec.pkiConfiguration) && Objects.equals(jksConfiguration, vaultSpec.jksConfiguration) && Objects.equals(versionConfiguration, vaultSpec.versionConfiguration) && Objects.equals(propertiesConfiguration, vaultSpec.propertiesConfiguration) && Objects.equals(dockerCfgConfiguration, vaultSpec.dockerCfgConfiguration) && Objects.equals(changeAdjustmentCallback, vaultSpec.changeAdjustmentCallback);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, type, pkiConfiguration, jksConfiguration, versionConfiguration, propertiesConfiguration, dockerCfgConfiguration, changeAdjustmentCallback);
     }
 }

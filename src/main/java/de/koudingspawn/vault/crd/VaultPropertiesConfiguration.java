@@ -1,6 +1,7 @@
 package de.koudingspawn.vault.crd;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class VaultPropertiesConfiguration {
 
@@ -21,5 +22,18 @@ public class VaultPropertiesConfiguration {
 
     public void setContext(HashMap<String, String> context) {
         this.context = context;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VaultPropertiesConfiguration that = (VaultPropertiesConfiguration) o;
+        return Objects.equals(files, that.files) && Objects.equals(context, that.context);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(files, context);
     }
 }

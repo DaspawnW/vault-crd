@@ -1,6 +1,7 @@
 package de.koudingspawn.vault.kubernetes;
 
 import de.koudingspawn.vault.crd.Vault;
+import de.koudingspawn.vault.kubernetes.cache.SecretCache;
 import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -49,7 +50,8 @@ public class KubernetesServiceTest {
 
     @Before
     public void setUp() {
-        kubernetesService = new KubernetesService(client, CRDNAME, CRDGROUP);
+        SecretCache secretCache = new SecretCache(client, false);
+        kubernetesService = new KubernetesService(client, secretCache, CRDNAME, CRDGROUP);
 
         Namespace ns = new NamespaceBuilder().withMetadata(new ObjectMetaBuilder().withName(NAMESPACE).build()).build();
         client.namespaces().createOrReplace(ns);
@@ -138,7 +140,7 @@ public class KubernetesServiceTest {
 
         return new SecretBuilder()
                 .withNewMetadata()
-                    .withName(SECRETNAME)
+                .withName(SECRETNAME)
                 .endMetadata()
                 .addToData(data)
                 .build();

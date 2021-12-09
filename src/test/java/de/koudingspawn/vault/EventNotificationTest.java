@@ -22,8 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
-        "kubernetes.vault.url=http://localhost:8202/v1/",
-        "kubernetes.initial-delay=5000000"
+        "kubernetes.vault.url=http://localhost:8202/v1/"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
