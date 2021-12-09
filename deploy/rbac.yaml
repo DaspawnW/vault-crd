@@ -43,6 +43,7 @@ rules:
       - patch
       - update
       - delete
+      - watch
   - apiGroups:
       - extensions
       - apps
