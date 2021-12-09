@@ -78,7 +78,7 @@ public class CertTest {
     public void shouldGenerateCertFromVaultResource() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("certificate").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
+                new ObjectMetaBuilder().withName("certificate-1").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.CERT);
@@ -108,9 +108,9 @@ public class CertTest {
 
         handler.addHandler(vault);
 
-        Secret secret = client.secrets().inNamespace("default").withName("certificate").get();
+        Secret secret = client.secrets().inNamespace("default").withName("certificate-1").get();
 
-        assertEquals("certificate", secret.getMetadata().getName());
+        assertEquals("certificate-1", secret.getMetadata().getName());
         assertEquals("default", secret.getMetadata().getNamespace());
         assertEquals("Opaque", secret.getType());
         assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
@@ -129,7 +129,7 @@ public class CertTest {
     public void shouldCheckIfCertificateHasChangedAndReturnFalse() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("certificate").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
+                new ObjectMetaBuilder().withName("certificate-2").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.CERT);
@@ -166,7 +166,7 @@ public class CertTest {
     public void shouldCheckIfCertificateHasChangedAndReturnTrue() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("certificate").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
+                new ObjectMetaBuilder().withName("certificate-3").withNamespace("default").withUid(UUID.randomUUID().toString()).build()
         );
         VaultSpec spec = new VaultSpec();
         spec.setType(VaultType.CERT);
@@ -223,15 +223,6 @@ public class CertTest {
         handler.addHandler(vault);
 
         assertTrue(certRefresh.refreshIsNeeded(vault));
-    }
-
-    @After
-    @Before
-    public void cleanup() {
-        Secret secret = client.secrets().inNamespace("default").withName("certificate").get();
-        if (secret != null) {
-            client.secrets().inNamespace("default").withName("certificate").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
-        }
     }
 
 }

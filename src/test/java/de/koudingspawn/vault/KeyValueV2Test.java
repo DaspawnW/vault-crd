@@ -79,7 +79,7 @@ public class KeyValueV2Test {
     public void shouldGenerateSimpleSecretFromVaultCustomResource() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
+                new ObjectMetaBuilder().withName("simple-kv2-1").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple");
@@ -112,8 +112,8 @@ public class KeyValueV2Test {
 
         handler.addHandler(vault);
 
-        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
-        assertEquals("simple", secret.getMetadata().getName());
+        Secret secret = client.secrets().inNamespace("default").withName("simple-kv2-1").get();
+        assertEquals("simple-kv2-1", secret.getMetadata().getName());
         assertEquals("default", secret.getMetadata().getNamespace());
         assertEquals("Opaque", secret.getType());
         assertEquals("dmFsdWU=", secret.getData().get("key"));
@@ -125,7 +125,7 @@ public class KeyValueV2Test {
     public void shouldCheckIfSimpleSecretHasChangedAndReturnTrue() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
+                new ObjectMetaBuilder().withName("simple-kv2-2").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple");
@@ -195,7 +195,7 @@ public class KeyValueV2Test {
     public void shouldCheckIfSimpleSecretHasChangedAndReturnFalse() throws SecretNotAccessibleException {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
+                new ObjectMetaBuilder().withName("simple-kv2-3").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple");
@@ -235,7 +235,7 @@ public class KeyValueV2Test {
     public void shouldSupportNestedPath() {
         Vault vault = new Vault();
         vault.setMetadata(
-                new ObjectMetaBuilder().withName("simple").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
+                new ObjectMetaBuilder().withName("simple-kv2-4").withNamespace("default").withUid(UUID.randomUUID().toString()).build());
         VaultSpec vaultSpec = new VaultSpec();
         vaultSpec.setType(VaultType.KEYVALUEV2);
         vaultSpec.setPath("secret/simple/nested");
@@ -269,23 +269,14 @@ public class KeyValueV2Test {
 
         handler.addHandler(vault);
 
-        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
-        assertEquals("simple", secret.getMetadata().getName());
+        Secret secret = client.secrets().inNamespace("default").withName("simple-kv2-4").get();
+        assertEquals("simple-kv2-4", secret.getMetadata().getName());
         assertEquals("default", secret.getMetadata().getNamespace());
         assertEquals("Opaque", secret.getType());
         assertEquals("dmFsdWU=", secret.getData().get("key"));
         assertEquals("dmFsdWUy", secret.getData().get("nested"));
         assertNotNull(secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + LAST_UPDATE_ANNOTATION));
         assertEquals("z/SCo8oELBDAF2DQvX2H3yLs6vvn55Z6c8fdS3Y7l64=", secret.getMetadata().getAnnotations().get("vault.koudingspawn.de" + COMPARE_ANNOTATION));
-    }
-
-    @Before
-    @After
-    public void cleanupAfterJob() {
-        Secret secret = client.secrets().inNamespace("default").withName("simple").get();
-        if (secret != null) {
-            client.secrets().inNamespace("default").withName("simple").withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
-        }
     }
 
 }

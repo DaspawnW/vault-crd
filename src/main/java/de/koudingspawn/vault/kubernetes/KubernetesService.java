@@ -1,6 +1,7 @@
 package de.koudingspawn.vault.kubernetes;
 
 import de.koudingspawn.vault.crd.Vault;
+import de.koudingspawn.vault.kubernetes.cache.SecretCache;
 import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -29,13 +30,16 @@ public class KubernetesService {
     private final KubernetesClient client;
     private final String crdName;
     private final String crdGroup;
+    private final SecretCache secretCache;
 
     public KubernetesService(KubernetesClient client,
+                             SecretCache secretCache,
                              @Value("${kubernetes.crd.name}") String crdName,
                              @Value("${kubernetes.crd.group}") String crdGroup) {
         this.client = client;
         this.crdName = crdName;
         this.crdGroup = crdGroup;
+        this.secretCache = secretCache;
     }
 
     boolean exists(Vault resource) {
@@ -52,13 +56,18 @@ public class KubernetesService {
     }
 
     void createSecret(Vault resource, VaultSecret vaultSecret) {
-        client.secrets().inNamespace(resource.getMetadata().getNamespace()).create(newSecretInstance(resource, vaultSecret));
+        Secret secret = newSecretInstance(resource, vaultSecret);
 
-        log.info("Created secret for vault resource {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
+        secretCache.invalidate(secret.getMetadata().getNamespace(), secret.getMetadata().getName());
+        client.secrets().inNamespace(resource.getMetadata().getNamespace()).create(secret);
+
+        log.info("Created secret for vault resource {} in namespace {}", secret.getMetadata().getName(), secret.getMetadata().getNamespace());
     }
 
     void deleteSecret(ObjectMeta resourceMetadata) {
+        secretCache.invalidate(resourceMetadata.getNamespace(), resourceMetadata.getName());
         client.secrets().inNamespace(resourceMetadata.getNamespace()).withName(resourceMetadata.getName()).withPropagationPolicy(DeletionPropagation.BACKGROUND).delete();
+
         log.info("Deleted secret {} in namespace {}", resourceMetadata.getName(), resourceMetadata.getNamespace());
     }
 
@@ -76,15 +85,14 @@ public class KubernetesService {
         secret.setMetadata(metaData(resource.getMetadata(), vaultSecret.getCompare()));
         secret.setData(vaultSecret.getData());
 
+        secretCache.invalidate(resource.getMetadata().getNamespace(), resource.getMetadata().getName());
         secretResource.createOrReplace(secret);
+
         log.info("Modified secret {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
     }
 
     public Secret getSecretByVault(Vault resource) {
-        Resource<Secret> secretResource =
-                client.secrets().inNamespace(resource.getMetadata().getNamespace()).withName(resource.getMetadata().getName());
-
-        return secretResource.get();
+        return secretCache.get(resource.getMetadata().getNamespace(), resource.getMetadata().getName());
     }
 
     private ObjectMeta metaData(ObjectMeta resource, String compare) {
@@ -94,6 +102,11 @@ public class KubernetesService {
         if (resource.getLabels() != null) {
             meta.setLabels(resource.getLabels());
         }
+
+        if (meta.getLabels() == null) {
+            meta.setLabels(new HashMap<>());
+        }
+        meta.getLabels().put(crdName, "vault");
 
         HashMap<String, String> annotations = new HashMap<>();
         if (resource.getAnnotations() != null) {
