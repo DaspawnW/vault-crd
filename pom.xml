@@ -23,6 +23,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<fabric8.version>5.9.0</fabric8.version>
+		<logback.version>1.2.8</logback.version>
+		<log4j2.version>2.16.0</log4j2.version>
 	</properties>
 
 	<dependencies>
