@@ -103,6 +103,7 @@ public class PropertiesTest {
         assertTrue(renderedProperties.contains("test=kv1content"));
         assertTrue(renderedProperties.contains("test2=kv2content"));
         assertTrue(renderedProperties.contains("test3=contextvalue"));
+        assertTrue(renderedProperties.contains("spring.jpa.properties.hibernate.dialect=class.module.classLoader.resources.context.parent.pipeline.first"));
     }
 
     @Test(expected = SecretNotAccessibleException.class)
