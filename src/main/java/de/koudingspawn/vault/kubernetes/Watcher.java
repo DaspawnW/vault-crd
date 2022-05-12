@@ -53,7 +53,7 @@ public class Watcher {
 
                     @Override
                     public void onUpdate(Vault oldObj, Vault resource) {
-                        if (oldObj.equals(resource)) {
+                        if (oldObj.modifyHandlerEquals(resource)) {
                             log.info("Received scheduled refresh for {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
                             scheduledRefresh.refreshVaultResource(resource);
                         } else {
