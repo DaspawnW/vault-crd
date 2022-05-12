@@ -78,7 +78,7 @@ public class EventHandler {
             log.error("Failed to modify secret for vault resource {} in namespace {} failed with exception:",
                     resource.getMetadata().getName(), resource.getMetadata().getNamespace(), e);
 
-            eventNotification.storeNewEvent(MODIFICATION_FAILED, "Modification of secret failed with exception " + e.getMessage(), resource);
+            eventNotification.storeNewEvent(MODIFICATION_FAILED, "Modification failed " + e.getMessage(), resource);
         }
     }
 

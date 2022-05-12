@@ -42,7 +42,7 @@ public class PropertiesGenerator implements TypedSecretGenerator {
                 // TODO: support change in properties
                 return new VaultSecret(renderedFiles, "COMPARE");
             } catch (FatalTemplateErrorsException ex) {
-                throw new SecretNotAccessibleException("Failed to render properties files:", ex);
+                throw new SecretNotAccessibleException(ex.getMessage(), ex);
             }
         }
 

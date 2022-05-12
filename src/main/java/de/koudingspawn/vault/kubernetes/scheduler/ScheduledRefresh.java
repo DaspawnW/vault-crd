@@ -35,6 +35,7 @@ public class ScheduledRefresh {
         RequiresRefresh requiresRefresh = typeRefreshFactory.get(resource.getSpec().getType().toString());
         try {
             if (requiresRefresh.refreshIsNeeded(resource)) {
+                log.info("Executing scheduled refresh for {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
                 eventHandler.modifyHandler(resource);
             }
         } catch (SecretNotAccessibleException e) {

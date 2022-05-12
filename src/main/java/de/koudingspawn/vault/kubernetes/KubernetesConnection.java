@@ -26,7 +26,7 @@ public class KubernetesConnection {
     @Bean
     @Profile("development")
     public KubernetesClient testClient() {
-        Config config = new ConfigBuilder().withMasterUrl("http://localhost:8080").withWatchReconnectLimit(5).build();
+        Config config = new ConfigBuilder().withMasterUrl("http://localhost:8001").withWatchReconnectLimit(5).build();
         return new DefaultKubernetesClient(config);
     }
 
