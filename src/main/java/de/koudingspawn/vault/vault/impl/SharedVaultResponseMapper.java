@@ -6,6 +6,7 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.vault.VaultSecret;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import de.koudingspawn.vault.vault.impl.pki.VaultResponseData;
+import org.bouncycastle.jcajce.PKCS12StoreParameter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -83,8 +84,9 @@ public class SharedVaultResponseMapper {
     VaultSecret mapJks(VaultResponseData data, VaultJKSConfiguration jksConfiguration, VaultType type) throws SecretNotAccessibleException {
 
         try {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(null, getPassword(jksConfiguration).toCharArray());
+            KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(getPassword(jksConfiguration).toCharArray(), "HmacPBESHA1", null);
+            KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+            keyStore.load(() -> passwordProtection);
 
             Certificate[] publicKeyList = getPublicKey(data.getCertificate());
 
@@ -102,11 +104,10 @@ public class SharedVaultResponseMapper {
             }
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            keyStore.store(outputStream, getPassword(jksConfiguration).toCharArray());
-
+            keyStore.store(new PKCS12StoreParameter(outputStream, passwordProtection));
             String b64KeyStore = Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
-            HashMap<String, String> secretData = new HashMap<String, String>() {{
+            HashMap<String, String> secretData = new HashMap<>() {{
                 put(getKey(jksConfiguration), b64KeyStore);
             }};
 
