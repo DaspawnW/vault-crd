@@ -5,6 +5,8 @@ metadata:
 spec:
   path: "testpki/issue/testrole"
   type: "PKIJKS"
+  jksConfiguration:
+    caAlias: CARoot
   pkiConfiguration:
     commonName: "vault.koudingspawn.de"
     ttl: "7m"

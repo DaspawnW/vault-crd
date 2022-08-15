@@ -16,5 +16,5 @@ FROM gcr.io/distroless/java17:nonroot
 COPY --from=BUILD /opt/target/vault-crd.jar /opt/vault-crd.jar
 COPY --from=BUILD /java.security /etc/java-17-openjdk/security/java.security
 
-ENTRYPOINT ["/usr/bin/java", "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-Djavax.net.ssl.trustStoreType=jks"]
+ENTRYPOINT ["/usr/bin/java", "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-Djavax.net.ssl.trustStoreType=jks", "-Dkeystore.pkcs12.legacy"]
 CMD ["-jar", "/opt/vault-crd.jar"]
