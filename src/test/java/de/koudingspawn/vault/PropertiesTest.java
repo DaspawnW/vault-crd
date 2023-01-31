@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ import static org.junit.Assert.*;
 public class PropertiesTest {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8208));
 
     @Rule
@@ -68,7 +69,7 @@ public class PropertiesTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }

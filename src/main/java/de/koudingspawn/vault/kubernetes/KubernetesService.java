@@ -59,7 +59,7 @@ public class KubernetesService {
         Secret secret = newSecretInstance(resource, vaultSecret);
 
         secretCache.invalidate(secret.getMetadata().getNamespace(), secret.getMetadata().getName());
-        client.secrets().inNamespace(resource.getMetadata().getNamespace()).create(secret);
+        client.secrets().inNamespace(resource.getMetadata().getNamespace()).resource(secret).create();
 
         log.info("Created secret for vault resource {} in namespace {}", secret.getMetadata().getName(), secret.getMetadata().getNamespace());
     }
@@ -86,7 +86,7 @@ public class KubernetesService {
         secret.setData(vaultSecret.getData());
 
         secretCache.invalidate(resource.getMetadata().getNamespace(), resource.getMetadata().getName());
-        secretResource.createOrReplace(secret);
+        client.secrets().inNamespace(resource.getMetadata().getNamespace()).resource(secret).createOrReplace();
 
         log.info("Modified secret {} in namespace {}", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
     }
@@ -145,9 +145,7 @@ public class KubernetesService {
 
             if (secret.getMetadata() != null && secret.getMetadata().getOwnerReferences() != null && secret.getMetadata().getOwnerReferences().size() == 1) {
                 OwnerReference ownerReference = secret.getMetadata().getOwnerReferences().get(0);
-                if (ownerReference.getApiVersion().equals(crdName + "/v1")) {
-                    return true;
-                }
+                return ownerReference.getApiVersion().equals(crdName + "/v1");
             }
         }
 

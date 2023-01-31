@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -41,7 +42,7 @@ import static org.junit.Assert.*;
 public class KeyValueTest {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8209));
 
     @Rule
@@ -62,7 +63,7 @@ public class KeyValueTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }

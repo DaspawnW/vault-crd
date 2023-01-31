@@ -10,8 +10,8 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import org.junit.Before;
@@ -41,10 +41,10 @@ import static org.junit.Assert.assertNotNull;
         }
 
 )
-public class OwnerReferenceBugfix {
+public class OwnerReferenceBugfixTest {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8210));
 
     @Rule
@@ -65,7 +65,7 @@ public class OwnerReferenceBugfix {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }
@@ -113,7 +113,7 @@ public class OwnerReferenceBugfix {
                 )
                 .withData(Collections.singletonMap("key", "dmFsdWU="))
                 .build();
-        client.secrets().inNamespace("default").withName("properties-correct-owner-2").create(secret);
+        client.secrets().inNamespace("default").resource(secret).create();
 
         handler.addHandler(vault);
 

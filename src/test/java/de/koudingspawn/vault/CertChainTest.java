@@ -8,12 +8,14 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.CertRefresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
-import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.*;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +42,7 @@ import static org.junit.Assert.*;
 public class CertChainTest {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8206));
 
     @Rule
@@ -58,7 +60,7 @@ public class CertChainTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }
@@ -89,23 +91,24 @@ public class CertChainTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"6cc090a8-3821-8244-73e4-5ab62b605587\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 2764800,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"certificate\": \"CERTIFICATE\",\n" +
-                                "      \"issuing_ca\": \"ISSUINGCA\",\n" +
-                                "      \"ca_chain\": [\"ISSUINGCA\"],\n" +
-                                "      \"private_key\": \"PRIVATEKEY\"\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "6cc090a8-3821-8244-73e4-5ab62b605587",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 2764800,
+                                  "data": {
+                                    "data": {
+                                      "certificate": "CERTIFICATE",
+                                      "issuing_ca": "ISSUINGCA",
+                                      "ca_chain": ["ISSUINGCA"],
+                                      "private_key": "PRIVATEKEY"
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 
@@ -141,23 +144,24 @@ public class CertChainTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"6cc090a8-3821-8244-73e4-5ab62b605587\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 2764800,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"certificate\": \"CERTIFICATE\",\n" +
-                                "      \"issuing_ca\": \"ISSUINGCA\",\n" +
-                                "      \"ca_chain\": [\"ISSUINGCA\"],\n" +
-                                "      \"private_key\": \"PRIVATEKEY\"\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "6cc090a8-3821-8244-73e4-5ab62b605587",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 2764800,
+                                  "data": {
+                                    "data": {
+                                      "certificate": "CERTIFICATE",
+                                      "issuing_ca": "ISSUINGCA",
+                                      "ca_chain": ["ISSUINGCA"],
+                                      "private_key": "PRIVATEKEY"
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 
@@ -182,23 +186,24 @@ public class CertChainTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"6cc090a8-3821-8244-73e4-5ab62b605587\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 2764800,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"certificate\": \"CERTIFICATE\",\n" +
-                                "      \"issuing_ca\": \"ISSUINGCA\",\n" +
-                                "      \"ca_chain\": [\"ISSUINGCA\"],\n" +
-                                "      \"private_key\": \"PRIVATEKEY\"\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "6cc090a8-3821-8244-73e4-5ab62b605587",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 2764800,
+                                  "data": {
+                                    "data": {
+                                      "certificate": "CERTIFICATE",
+                                      "issuing_ca": "ISSUINGCA",
+                                      "ca_chain": ["ISSUINGCA"],
+                                      "private_key": "PRIVATEKEY"
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         stubFor(get(urlEqualTo("/v1/secret/certificate"))
                 .inScenario("Cert secret change")
@@ -206,23 +211,24 @@ public class CertChainTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"6cc090a8-3821-8244-73e4-5ab62b605587\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 2764800,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"certificate\": \"CERTIFICATECHANGE\",\n" +
-                                "      \"issuing_ca\": \"ISSUINGCA\",\n" +
-                                "      \"ca_chain\": [\"ISSUINGCA\"],\n" +
-                                "      \"private_key\": \"PRIVATEKEY\"\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "6cc090a8-3821-8244-73e4-5ab62b605587",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 2764800,
+                                  "data": {
+                                    "data": {
+                                      "certificate": "CERTIFICATECHANGE",
+                                      "issuing_ca": "ISSUINGCA",
+                                      "ca_chain": ["ISSUINGCA"],
+                                      "private_key": "PRIVATEKEY"
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 
