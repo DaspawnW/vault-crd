@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.api.model.StatusBuilder;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionRequest;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponse;
 import io.fabric8.kubernetes.api.model.admission.v1.AdmissionResponseBuilder;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,8 @@ public class AdmissionReviewService {
 
     public AdmissionResponse validate(AdmissionRequest admissionRequest) {
         try {
-            Vault vault = (Vault) admissionRequest.getObject();
+            String s = Serialization.asYaml(admissionRequest.getObject());
+            Vault vault = Serialization.unmarshal(s, Vault.class);
             vaultService.generateSecret(vault);
         } catch (ClassCastException ex) {
             log.error("Received Admission Request of invalid type!");

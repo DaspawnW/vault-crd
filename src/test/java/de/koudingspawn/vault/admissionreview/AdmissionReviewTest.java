@@ -60,26 +60,27 @@ public class AdmissionReviewTest {
         SecretNotAccessibleException secretException = new SecretNotAccessibleException("Secret is not accessible");
         Mockito.when(vaultService.generateSecret(any())).thenThrow(secretException);
 
-        mvc.perform(post("/validation/vault-crd").content("{\n" +
-                "  \"apiVersion\": \"admission.k8s.io/v1\",\n" +
-                "  \"kind\": \"AdmissionReview\",\n" +
-                "  \"request\": {\n" +
-                "    \"uid\": \"705ab4f5-6393-11e8-b7cc-42010a800002\",\n" +
-                "    \"object\": {\n" +
-                "      \"apiVersion\": \"koudingspawn.de/v1\",\n" +
-                "      \"kind\": \"Vault\",\n" +
-                "      \"metadata\": {\n" +
-                "        \"name\": \"test-vault\",\n" +
-                "        \"namespace\": \"default\"\n" +
-                "      " +
-                "},\n" +
-                "      \"spec\": {\n" +
-                "        \"type\": \"KEYVALUE\",\n" +
-                "        \"path\": \"secret/qweasd\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}").contentType("application/json"))
+        mvc.perform(post("/validation/vault-crd").content("""
+                        {
+                          "apiVersion": "admission.k8s.io/v1",
+                          "kind": "AdmissionReview",
+                          "request": {
+                            "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+                            "object": {
+                              "apiVersion": "koudingspawn.de/v1",
+                              "kind": "Vault",
+                              "metadata": {
+                                "name": "test-vault",
+                                "namespace": "default"
+                              },
+                              "spec": {
+                                "type": "KEYVALUE",
+                                "path": "secret/qweasd"
+                              }
+                            }
+                          }
+                        }
+                        """).contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.uid").value("705ab4f5-6393-11e8-b7cc-42010a800002"))
@@ -93,26 +94,26 @@ public class AdmissionReviewTest {
         VaultSecret vaultSecret = new VaultSecret(new HashMap<>(), "qweasd");
         Mockito.when(vaultService.generateSecret(any())).thenReturn(vaultSecret);
 
-        mvc.perform(post("/validation/vault-crd").content("{\n" +
-                "  \"apiVersion\": \"admission.k8s.io/v1\",\n" +
-                "  \"kind\": \"AdmissionReview\",\n" +
-                "  \"request\": {\n" +
-                "    \"uid\": \"705ab4f5-6393-11e8-b7cc-42010a800002\",\n" +
-                "    \"object\": {\n" +
-                "      \"apiVersion\": \"koudingspawn.de/v1\",\n" +
-                "      \"kind\": \"Vault\",\n" +
-                "      \"metadata\": {\n" +
-                "        \"name\": \"test-vault\",\n" +
-                "        \"namespace\": \"default\"\n" +
-                "      " +
-                "},\n" +
-                "      \"spec\": {\n" +
-                "        \"type\": \"KEYVALUE\",\n" +
-                "        \"path\": \"secret/qweasd\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}").contentType("application/json"))
+        mvc.perform(post("/validation/vault-crd").content("""
+                        {
+                          "apiVersion": "admission.k8s.io/v1",
+                          "kind": "AdmissionReview",
+                          "request": {
+                            "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+                            "object": {
+                              "apiVersion": "koudingspawn.de/v1",
+                              "kind": "Vault",
+                              "metadata": {
+                                "name": "test-vault",
+                                "namespace": "default"
+                              },
+                              "spec": {
+                                "type": "KEYVALUE",
+                                "path": "secret/qweasd"
+                              }
+                            }
+                          }
+                        }""").contentType("application/json"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.uid").value("705ab4f5-6393-11e8-b7cc-42010a800002"))
