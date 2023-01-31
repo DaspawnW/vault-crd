@@ -59,7 +59,7 @@ public class EventNotification {
                 .build();
 
         try {
-            client.v1().events().resource(evt).create();
+            client.v1().events().inNamespace(resource.getMetadata().getNamespace()).resource(evt).create();
         } catch (Exception ex) {
             log.error("Failed to store event for {} in namespace {} next to resource with error",
                     resource.getMetadata().getName(), resource.getMetadata().getNamespace(), ex);
