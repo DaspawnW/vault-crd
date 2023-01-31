@@ -14,7 +14,7 @@ public class SecretCache {
 
     private static final Logger log = LoggerFactory.getLogger(SecretCache.class);
 
-    private Cache<String, Secret> secretResourceCache = Caffeine.newBuilder().build();
+    private final Cache<String, Secret> secretResourceCache = Caffeine.newBuilder().build();
     private final KubernetesClient client;
 
     public SecretCache(KubernetesClient client, boolean watch) {
@@ -28,23 +28,28 @@ public class SecretCache {
     public void watcher() {
         client.secrets().inAnyNamespace().withLabel("vault.koudingspawn.de=vault").inform(
                 new ResourceEventHandler<>() {
+
+                    private String cacheKey(String namespace, String name) {
+                        return "%s/%s".formatted(namespace, name);
+                    }
+
                     @Override
                     public void onAdd(Secret obj) {
-                        String key = String.format("%s/%s", obj.getMetadata().getNamespace(), obj.getMetadata().getName());
+                        String key = cacheKey(obj.getMetadata().getNamespace(), obj.getMetadata().getName());
                         log.debug("Received create secret for {}", key);
                         secretResourceCache.put(key, obj);
                     }
 
                     @Override
                     public void onUpdate(Secret oldObj, Secret newObj) {
-                        String key = String.format("%s/%s", newObj.getMetadata().getNamespace(), newObj.getMetadata().getName());
+                        String key = cacheKey(newObj.getMetadata().getNamespace(), newObj.getMetadata().getName());
                         log.debug("Received update for secret {}", key);
                         secretResourceCache.put(key, newObj);
                     }
 
                     @Override
                     public void onDelete(Secret obj, boolean deletedFinalStateUnknown) {
-                        String key = String.format("%s/%s", obj.getMetadata().getNamespace(), obj.getMetadata().getName());
+                        String key = cacheKey(obj.getMetadata().getNamespace(), obj.getMetadata().getName());
                         log.debug("Invalidate secret cache for {} after delete", key);
                         secretResourceCache.invalidate(key);
                     }

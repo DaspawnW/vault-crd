@@ -8,12 +8,14 @@ import de.koudingspawn.vault.crd.VaultType;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.scheduler.impl.KeyValueV2Refresh;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
-import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.*;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,7 +43,7 @@ import static org.junit.Assert.*;
 public class KeyValueV2Test {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8207));
 
     @Rule
@@ -62,7 +64,7 @@ public class KeyValueV2Test {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }
@@ -86,29 +88,30 @@ public class KeyValueV2Test {
         vault.setSpec(vaultSpec);
 
         stubFor(get(urlPathMatching("/v1/secret/data/simple"))
-            .willReturn(aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody("{\n" +
-                    "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
-                    "  \"lease_id\": \"\",\n" +
-                    "  \"renewable\": false,\n" +
-                    "  \"lease_duration\": 0,\n" +
-                    "  \"data\": {\n" +
-                    "    \"data\": {\n" +
-                    "      \"key\": \"value\"\n" +
-                    "    },\n" +
-                    "    \"metadata\": {\n" +
-                    "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
-                    "      \"deletion_time\": \"\",\n" +
-                    "      \"destroyed\": false,\n" +
-                    "      \"version\": 1\n" +
-                    "    }\n" +
-                    "  },\n" +
-                    "  \"wrap_info\": null,\n" +
-                    "  \"warnings\": null,\n" +
-                    "  \"auth\": null\n" +
-                    "}")));
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                                {
+                                  "request_id": "1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 0,
+                                  "data": {
+                                    "data": {
+                                      "key": "value"
+                                    },
+                                    "metadata": {
+                                      "created_time": "2018-12-10T18:59:53.337997525Z",
+                                      "deletion_time": "",
+                                      "destroyed": false,
+                                      "version": 1
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 
@@ -138,26 +141,27 @@ public class KeyValueV2Test {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 0,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"key\": \"value\"\n" +
-                                "    },\n" +
-                                "    \"metadata\": {\n" +
-                                "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
-                                "      \"deletion_time\": \"\",\n" +
-                                "      \"destroyed\": false,\n" +
-                                "      \"version\": 1\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 0,
+                                  "data": {
+                                    "data": {
+                                      "key": "value"
+                                    },
+                                    "metadata": {
+                                      "created_time": "2018-12-10T18:59:53.337997525Z",
+                                      "deletion_time": "",
+                                      "destroyed": false,
+                                      "version": 1
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         stubFor(get(urlPathMatching("/v1/secret/data/simple"))
                 .inScenario("Vault secret change")
@@ -165,26 +169,27 @@ public class KeyValueV2Test {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 0,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"key\": \"value1\"\n" +
-                                "    },\n" +
-                                "    \"metadata\": {\n" +
-                                "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
-                                "      \"deletion_time\": \"\",\n" +
-                                "      \"destroyed\": false,\n" +
-                                "      \"version\": 1\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 0,
+                                  "data": {
+                                    "data": {
+                                      "key": "value1"
+                                    },
+                                    "metadata": {
+                                      "created_time": "2018-12-10T18:59:53.337997525Z",
+                                      "deletion_time": "",
+                                      "destroyed": false,
+                                      "version": 1
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 
@@ -205,26 +210,27 @@ public class KeyValueV2Test {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 0,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"key\": \"value\"\n" +
-                                "    },\n" +
-                                "    \"metadata\": {\n" +
-                                "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
-                                "      \"deletion_time\": \"\",\n" +
-                                "      \"destroyed\": false,\n" +
-                                "      \"version\": 1\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 0,
+                                  "data": {
+                                    "data": {
+                                      "key": "value"
+                                    },
+                                    "metadata": {
+                                      "created_time": "2018-12-10T18:59:53.337997525Z",
+                                      "deletion_time": "",
+                                      "destroyed": false,
+                                      "version": 1
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 
@@ -245,27 +251,28 @@ public class KeyValueV2Test {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 0,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"key\": \"value\",\n" +
-                                "      \"nested\": \"value2\"\n" +
-                                "    },\n" +
-                                "    \"metadata\": {\n" +
-                                "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
-                                "      \"deletion_time\": \"\",\n" +
-                                "      \"destroyed\": false,\n" +
-                                "      \"version\": 1\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 0,
+                                  "data": {
+                                    "data": {
+                                      "key": "value",
+                                      "nested": "value2"
+                                    },
+                                    "metadata": {
+                                      "created_time": "2018-12-10T18:59:53.337997525Z",
+                                      "deletion_time": "",
+                                      "destroyed": false,
+                                      "version": 1
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 

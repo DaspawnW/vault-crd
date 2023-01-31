@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ import static org.junit.Assert.*;
 public class DockerCfgTest {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8202));
 
     @Rule
@@ -67,7 +68,7 @@ public class DockerCfgTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }
@@ -97,21 +98,22 @@ public class DockerCfgTest {
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
-                .withBody("{\n" +
-                        "  \"request_id\": \"6cc090a8-3821-8244-73e4-5ab62b605587\",\n" +
-                        "  \"lease_id\": \"\",\n" +
-                        "  \"renewable\": false,\n" +
-                        "  \"lease_duration\": 2764800,\n" +
-                        "  \"data\": {\n" +
-                        "    \"username\": \"username\",\n" +
-                        "    \"password\": \"password\",\n" +
-                        "    \"url\": \"hub.docker.com\",\n" +
-                        "    \"email\": \"test-user@test.com\"\n" +
-                        "  },\n" +
-                        "  \"wrap_info\": null,\n" +
-                        "  \"warnings\": null,\n" +
-                        "  \"auth\": null\n" +
-                        "}")));
+                .withBody("""
+                        {
+                          "request_id": "6cc090a8-3821-8244-73e4-5ab62b605587",
+                          "lease_id": "",
+                          "renewable": false,
+                          "lease_duration": 2764800,
+                          "data": {
+                            "username": "username",
+                            "password": "password",
+                            "url": "hub.docker.com",
+                            "email": "test-user@test.com"
+                          },
+                          "wrap_info": null,
+                          "warnings": null,
+                          "auth": null
+                        }""")));
 
         handler.addHandler(vault);
 
@@ -210,29 +212,30 @@ public class DockerCfgTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"request_id\": \"1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6\",\n" +
-                                "  \"lease_id\": \"\",\n" +
-                                "  \"renewable\": false,\n" +
-                                "  \"lease_duration\": 0,\n" +
-                                "  \"data\": {\n" +
-                                "    \"data\": {\n" +
-                                "      \"username\": \"username\",\n" +
-                                "      \"password\": \"password\",\n" +
-                                "      \"url\": \"hub.docker.com\",\n" +
-                                "      \"email\": \"test-user@test.com\"\n" +
-                                "    },\n" +
-                                "    \"metadata\": {\n" +
-                                "      \"created_time\": \"2018-12-10T18:59:53.337997525Z\",\n" +
-                                "      \"deletion_time\": \"\",\n" +
-                                "      \"destroyed\": false,\n" +
-                                "      \"version\": 1\n" +
-                                "    }\n" +
-                                "  },\n" +
-                                "  \"wrap_info\": null,\n" +
-                                "  \"warnings\": null,\n" +
-                                "  \"auth\": null\n" +
-                                "}")));
+                        .withBody("""
+                                {
+                                  "request_id": "1cfee2a6-318a-ea12-f5b5-6fd52d74d2c6",
+                                  "lease_id": "",
+                                  "renewable": false,
+                                  "lease_duration": 0,
+                                  "data": {
+                                    "data": {
+                                      "username": "username",
+                                      "password": "password",
+                                      "url": "hub.docker.com",
+                                      "email": "test-user@test.com"
+                                    },
+                                    "metadata": {
+                                      "created_time": "2018-12-10T18:59:53.337997525Z",
+                                      "deletion_time": "",
+                                      "destroyed": false,
+                                      "version": 1
+                                    }
+                                  },
+                                  "wrap_info": null,
+                                  "warnings": null,
+                                  "auth": null
+                                }""")));
 
         handler.addHandler(vault);
 

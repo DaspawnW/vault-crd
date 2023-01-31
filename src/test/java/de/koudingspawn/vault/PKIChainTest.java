@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ import static org.junit.Assert.assertNotNull;
 public class PKIChainTest {
 
     @ClassRule
-    public static WireMockClassRule wireMockClassRule =
+    public static final WireMockClassRule wireMockClassRule =
             new WireMockClassRule(wireMockConfig().port(8205));
 
     @Rule
@@ -62,7 +63,7 @@ public class PKIChainTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
 
     }
@@ -91,21 +92,22 @@ public class PKIChainTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(
-                                String.format("{\n" +
-                                        "  \"request_id\": \"6cc090a8-3821-8244-73e4-5ab62b605587\",\n" +
-                                        "  \"lease_id\": \"\",\n" +
-                                        "  \"renewable\": false,\n" +
-                                        "  \"lease_duration\": 2764800,\n" +
-                                        "  \"data\": {\n" +
-                                        "      \"certificate\": \"%s\",\n" +
-                                        "      \"ca_chain\": [\"%s\"],\n" +
-                                        "      \"issuing_ca\": \"%s\",\n" +
-                                        "      \"private_key\": \"%s\"\n" +
-                                        "  },\n" +
-                                        "  \"wrap_info\": null,\n" +
-                                        "  \"warnings\": null,\n" +
-                                        "  \"auth\": null\n" +
-                                        "}", keyPair.getCertificate(), keyPair.getCa_chain().get(0), keyPair.getIssuing_ca(), keyPair.getPrivate_key())
+                                String.format("""
+                                        {
+                                          "request_id": "6cc090a8-3821-8244-73e4-5ab62b605587",
+                                          "lease_id": "",
+                                          "renewable": false,
+                                          "lease_duration": 2764800,
+                                          "data": {
+                                              "certificate": "%s",
+                                              "ca_chain": ["%s"],
+                                              "issuing_ca": "%s",
+                                              "private_key": "%s"
+                                          },
+                                          "wrap_info": null,
+                                          "warnings": null,
+                                          "auth": null
+                                        }""", keyPair.getCertificate(), keyPair.getCa_chain().get(0), keyPair.getIssuing_ca(), keyPair.getPrivate_key())
                         )));
 
         handler.addHandler(vaultResource);

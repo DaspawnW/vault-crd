@@ -3,10 +3,7 @@ package de.koudingspawn.vault.kubernetes;
 import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.crd.VaultList;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.*;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
@@ -27,13 +24,15 @@ public class KubernetesConnection {
     @Profile("development")
     public KubernetesClient testClient() {
         Config config = new ConfigBuilder().withMasterUrl("http://localhost:8001").withWatchReconnectLimit(5).build();
-        return new DefaultKubernetesClient(config);
+        return new KubernetesClientBuilder()
+                .withConfig(config)
+                .build();
     }
 
     @Bean
     @Profile("!development")
     public KubernetesClient client() {
-        return new DefaultKubernetesClient();
+        return new KubernetesClientBuilder().build();
     }
 
     @Bean

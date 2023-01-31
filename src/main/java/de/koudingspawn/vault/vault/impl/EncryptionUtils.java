@@ -74,12 +74,6 @@ public class EncryptionUtils {
         return readPkcs8PrivateKey(pkcs8bytes);
     }
 
-    public static String sanitizeJson(String json) {
-        return json.replace("\n", "")
-                .replace("\r", "")
-                .replace("\t", "");
-    }
-
     private static byte[] join(byte[] byteArray1, byte[] byteArray2) {
         byte[] bytes = new byte[byteArray1.length + byteArray2.length];
         System.arraycopy(byteArray1, 0, bytes, 0, byteArray1.length);

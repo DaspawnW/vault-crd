@@ -55,7 +55,7 @@ public class Vault extends CustomResource<VaultSpec, Void> implements Namespaced
 
             HashMap<String, String> annotations = new HashMap<>(getMetadata().getAnnotations());
             annotations.remove("kubectl.kubernetes.io/last-applied-configuration");
-            if (!Objects.equals(vaultAnnotations, annotations)) return false;
+            return Objects.equals(vaultAnnotations, annotations);
         }
 
 

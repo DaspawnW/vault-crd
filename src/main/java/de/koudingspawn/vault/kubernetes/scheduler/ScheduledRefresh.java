@@ -1,12 +1,9 @@
 package de.koudingspawn.vault.kubernetes.scheduler;
 
 import de.koudingspawn.vault.crd.Vault;
-import de.koudingspawn.vault.crd.VaultList;
 import de.koudingspawn.vault.kubernetes.EventHandler;
 import de.koudingspawn.vault.kubernetes.event.EventNotification;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -12,7 +12,7 @@ public enum EventType {
     private final String type;
     private final String reason;
 
-    private EventType(String type, String reason) {
+    EventType(String type, String reason) {
         this.type = type;
         this.reason = reason;
     }

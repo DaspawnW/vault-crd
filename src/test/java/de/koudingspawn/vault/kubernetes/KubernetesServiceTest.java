@@ -6,6 +6,7 @@ import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,12 +26,12 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 public class KubernetesServiceTest {
 
-    private static String COMPARE = "COMPARE";
-    private static String CRDNAME = "CRDNAME";
-    private static String CRDGROUP = "CRDGROUP";
+    private static final String COMPARE = "COMPARE";
+    private static final String CRDNAME = "CRDNAME";
+    private static final String CRDGROUP = "CRDGROUP";
 
-    private static String NAMESPACE = "test";
-    private static String SECRETNAME = "testsecret";
+    private static final String NAMESPACE = "test";
+    private static final String SECRETNAME = "testsecret";
 
     @Autowired
     public KubernetesClient client;
@@ -43,9 +44,8 @@ public class KubernetesServiceTest {
         @Bean
         @Primary
         public KubernetesClient client() {
-            return new DefaultKubernetesClient();
+            return new KubernetesClientBuilder().build();
         }
-
     }
 
     @Before
@@ -54,7 +54,7 @@ public class KubernetesServiceTest {
         kubernetesService = new KubernetesService(client, secretCache, CRDNAME, CRDGROUP);
 
         Namespace ns = new NamespaceBuilder().withMetadata(new ObjectMetaBuilder().withName(NAMESPACE).build()).build();
-        client.namespaces().createOrReplace(ns);
+        client.namespaces().resource(ns).createOrReplace();
     }
 
     @Test
@@ -62,7 +62,7 @@ public class KubernetesServiceTest {
         Vault vault = generateVault();
 
         Secret testsecret = generateSecret();
-        client.secrets().inNamespace(NAMESPACE).create(testsecret);
+        client.secrets().inNamespace(NAMESPACE).resource(testsecret).create();
 
         boolean exists = kubernetesService.exists(vault);
 
@@ -96,7 +96,7 @@ public class KubernetesServiceTest {
     public void shouldDeleteSecret() {
         Secret secret = generateSecret();
 
-        client.secrets().inNamespace(NAMESPACE).create(secret);
+        client.secrets().inNamespace(NAMESPACE).resource(secret).create();
 
         assertNotNull(client.secrets().inNamespace(NAMESPACE).withName(SECRETNAME).get());
 
@@ -108,7 +108,7 @@ public class KubernetesServiceTest {
     @Test
     public void shouldModifySecret() {
         Secret secret = generateSecret();
-        client.secrets().inNamespace(NAMESPACE).create(secret);
+        client.secrets().inNamespace(NAMESPACE).resource(secret).create();
 
         Vault vault = generateVault();
         HashMap<String, String> data = new HashMap<>();

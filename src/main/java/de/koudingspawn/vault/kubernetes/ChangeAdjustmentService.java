@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChangeAdjustmentService {
 
-    private static final Logger log = LoggerFactory.getLogger(KubernetesService.class);
+    private static final Logger log = LoggerFactory.getLogger(ChangeAdjustmentService.class);
 
     private final KubernetesClient client;
 
@@ -24,15 +24,13 @@ public class ChangeAdjustmentService {
         VaultChangeAdjustmentCallback changeAdjustmentCallback = resource.getSpec().getChangeAdjustmentCallback();
         if (changeAdjustmentCallback != null && changeAdjustmentCallback.getType() != null && changeAdjustmentCallback.getName() != null) {
             switch (changeAdjustmentCallback.getType().toLowerCase()) {
-                case "deployment":
-                    rotateDeployment(resource.getMetadata().getNamespace(), changeAdjustmentCallback.getName());
-                    break;
-                case "statefulset":
-                    rotateStatefulSet(resource.getMetadata().getNamespace(), changeAdjustmentCallback.getName());
-                    break;
-                default:
-                    log.info("Currently a change adjustment is only supported for type deployment. Resource {} in namespace {} has type {}",
-                            resource.getMetadata().getName(), resource.getMetadata().getNamespace(), changeAdjustmentCallback.getType());
+                case "deployment" ->
+                        rotateDeployment(resource.getMetadata().getNamespace(), changeAdjustmentCallback.getName());
+                case "statefulset" ->
+                        rotateStatefulSet(resource.getMetadata().getNamespace(), changeAdjustmentCallback.getName());
+                default ->
+                        log.info("Currently a change adjustment is only supported for type deployment. Resource {} in namespace {} has type {}",
+                                resource.getMetadata().getName(), resource.getMetadata().getNamespace(), changeAdjustmentCallback.getType());
             }
         } else {
             log.warn("Change adjustment callback for resource {} in namespace {} is invalid!", resource.getMetadata().getName(), resource.getMetadata().getNamespace());
