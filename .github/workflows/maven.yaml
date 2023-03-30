@@ -64,6 +64,7 @@ jobs:
       - name: Docker publish
         uses: daspawnw/docker-multi-build-push-action@master
         with:
+          platforms: "linux/amd64,linux/arm64"
           docker-tag: "${{ steps.vars.outputs.tag }}"
           ghcr-enabled: "true"
           ghcr-token: "${{ secrets.GITHUB_TOKEN }}"
