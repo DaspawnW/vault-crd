@@ -4,7 +4,6 @@ import de.koudingspawn.vault.crd.Vault;
 import de.koudingspawn.vault.kubernetes.cache.SecretCache;
 import de.koudingspawn.vault.vault.VaultSecret;
 import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import org.junit.After;
