@@ -37,12 +37,15 @@ public class KubernetesConnection {
 
     @Bean
     public MixedOperation<Vault, VaultList, Resource<Vault>> customResource(
-            KubernetesClient client, @Value("${kubernetes.crd.name}") String crdName) {
+            KubernetesClient client,
+            KubernetesDeserializer kubernetesDeserializer,
+            @Value("${kubernetes.crd.name}") String crdName) {
         Resource<CustomResourceDefinition> crdResource = client.apiextensions().v1().customResourceDefinitions().withName(crdName);
 
         // Hack for bug in Kubernetes-Client for CRDs https://github.com/fabric8io/kubernetes-client/issues/1099
-        String kind = StringUtils.substringAfter(crdName, ".") + "/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
+        String kind = "Vault";
+        String version = StringUtils.substringAfter(crdName, ".") + "/v1";
+        kubernetesDeserializer.registerCustomKind(version, kind, Vault.class);
 
         CustomResourceDefinition customResourceDefinition = crdResource.get();
         if (customResourceDefinition == null) {
@@ -51,6 +54,11 @@ public class KubernetesConnection {
         }
 
         return client.resources(Vault.class, VaultList.class);
+    }
+
+    @Bean
+    public KubernetesDeserializer kubernetesDeserializer() {
+        return new KubernetesDeserializer();
     }
 
 }

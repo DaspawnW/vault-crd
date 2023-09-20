@@ -51,8 +51,10 @@ public class AdmissionReviewTest {
 
     @Before
     public void setup() {
-        String kind = StringUtils.substringAfter("vault.koudingspawn.de", ".") + "/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
+        KubernetesDeserializer kubernetesDeserializer = new KubernetesDeserializer();
+        String version = StringUtils.substringAfter("vault.koudingspawn.de", ".") + "/v1";
+        String kind = "Vault";
+        kubernetesDeserializer.registerCustomKind(version, kind, Vault.class);
     }
 
     @Test
