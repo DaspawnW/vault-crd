@@ -7,9 +7,6 @@ import de.koudingspawn.vault.vault.VaultService;
 import de.koudingspawn.vault.vault.communication.SecretNotAccessibleException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.internal.KubernetesDeserializer;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -48,12 +45,6 @@ public class AdmissionReviewTest {
 
     @Autowired
     private MockMvc mvc;
-
-    @Before
-    public void setup() {
-        String kind = StringUtils.substringAfter("vault.koudingspawn.de", ".") + "/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
-    }
 
     @Test
     public void shouldFailWithInvalidRequest() throws Exception {
