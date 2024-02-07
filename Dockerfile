@@ -11,7 +11,7 @@ COPY --from=SECURITY /etc/java-17-openjdk/security/java.security /java.security
 RUN echo "networkaddress.cache.ttl=60" >> /java.security
 RUN sed -i -e "s@^securerandom.source=.*@securerandom.source=${JAVA_RANDOM}@" /java.security
 
-FROM gcr.io/distroless/java17:nonroot
+FROM --platform=$BUILDPLATFORM gcr.io/distroless/java17:nonroot
 
 COPY --from=BUILD /opt/target/vault-crd.jar /opt/vault-crd.jar
 COPY --from=BUILD /java.security /etc/java-17-openjdk/security/java.security
