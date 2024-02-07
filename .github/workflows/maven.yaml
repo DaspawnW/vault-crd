@@ -45,7 +45,7 @@ jobs:
   docker-push:
     name: Docker Push (GHCR & public ECR)
     runs-on: ubuntu-latest
-    #if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/docker-')
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/docker-')
     permissions:
       id-token: write
       contents: read
@@ -68,6 +68,6 @@ jobs:
           docker-tag: "${{ steps.vars.outputs.tag }}"
           ghcr-enabled: "true"
           ghcr-token: "${{ secrets.GITHUB_TOKEN }}"
-          ecr-enabled: "true"
+          ecr-enabled: ${{ github.repository == 'daspawnw/vault-crd }}
           ecr-role-to-assume: "${{ secrets.AWS_PUBLIC_ECR_ARN }}"
           ecr-repository-url: "public.ecr.aws/l2l6k4u5/vault-crd"
