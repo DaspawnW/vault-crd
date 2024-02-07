@@ -68,6 +68,6 @@ jobs:
           docker-tag: "${{ steps.vars.outputs.tag }}"
           ghcr-enabled: "true"
           ghcr-token: "${{ secrets.GITHUB_TOKEN }}"
-          ecr-enabled: ${{ github.repository == 'daspawnw/vault-crd }}
+          ecr-enabled: ${{ github.repository == 'daspawnw/vault-crd' }}
           ecr-role-to-assume: "${{ secrets.AWS_PUBLIC_ECR_ARN }}"
           ecr-repository-url: "public.ecr.aws/l2l6k4u5/vault-crd"
